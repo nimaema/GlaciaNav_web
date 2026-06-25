@@ -1,5 +1,13 @@
-import { type ReactNode } from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  animate,
+  motion,
+  useInView,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type Variants,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -98,6 +106,76 @@ export function Section({
     >
       <div className="mx-auto w-full max-w-6xl px-5 md:px-8">{children}</div>
     </section>
+  );
+}
+
+/**
+ * Counts up to a numeric value when scrolled into view.
+ * Accepts strings like "11,000+" or "4+" and preserves prefix/suffix.
+ */
+export function CountUp({
+  value,
+  className,
+}: {
+  value: string;
+  className?: string;
+}) {
+  const match = value.match(/^(\D*)([\d,]+)(.*)$/);
+  const prefix = match?.[1] ?? "";
+  const target = match ? parseInt(match[2].replace(/,/g, ""), 10) : 0;
+  const suffix = match?.[3] ?? "";
+
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const reduce = useReducedMotion();
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    if (!match) return;
+    if (reduce || !inView) {
+      if (inView) setN(target);
+      return;
+    }
+    const controls = animate(0, target, {
+      duration: 1.6,
+      ease: EASE,
+      onUpdate: (v) => setN(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, reduce, target, match]);
+
+  if (!match) return <span className={className}>{value}</span>;
+  return (
+    <span ref={ref} className={className}>
+      {prefix}
+      {n.toLocaleString("en-US")}
+      {suffix}
+    </span>
+  );
+}
+
+/** Wraps children in a scroll-linked vertical parallax drift. */
+export function Parallax({
+  children,
+  className,
+  distance = 60,
+}: {
+  children: ReactNode;
+  className?: string;
+  distance?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [distance, -distance]);
+
+  return (
+    <motion.div ref={ref} className={className} style={reduce ? undefined : { y }}>
+      {children}
+    </motion.div>
   );
 }
 

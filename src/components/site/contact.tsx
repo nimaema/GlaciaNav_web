@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Reveal, Section } from "./reveal";
+import { ChartGrid, MarkWatermark } from "./brand";
 
 export function Contact() {
   const [form, setForm] = useState({
@@ -22,7 +23,7 @@ export function Contact() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const subject = `Baltic Beta inquiry${form.company ? ` from ${form.company}` : ""}`;
+    const subject = `GlaciaNav inquiry${form.company ? ` from ${form.company}` : ""}`;
     const body = [
       `Name: ${form.name}`,
       `Company: ${form.company}`,
@@ -36,8 +37,13 @@ export function Contact() {
   }
 
   return (
-    <Section id="contact">
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+    <Section id="contact" className="relative overflow-hidden">
+      <ChartGrid tone="ink" fade="radial" className="opacity-50" />
+      <MarkWatermark
+        src="/logo-icon.svg"
+        className="pointer-events-none absolute -left-20 bottom-0 hidden w-80 opacity-[0.04] lg:block"
+      />
+      <div className="relative grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
         <Reveal>
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             {contact.headline}
@@ -57,7 +63,7 @@ export function Contact() {
         <Reveal delay={0.08}>
           <form
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-border bg-card p-6 md:p-8"
+            className="rounded-2xl border border-brand/15 bg-card p-6 shadow-[0_30px_60px_-30px_color-mix(in_srgb,var(--brand-strong)_35%,transparent)] md:p-8"
           >
             <FieldGroup>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

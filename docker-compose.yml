@@ -7,6 +7,11 @@
 #
 # Traffic flow:  internet -> Cloudflare -> cloudflared (this host) -> web:80
 # The web container is NOT published to the host; only the tunnel can reach it.
+#
+# Auto-deploy: the `watchtower` service polls GHCR and, when the GitHub Actions
+# build publishes a new `web` image, pulls it and restarts the container.
+# It only watches containers labelled watchtower.enable=true (i.e. `web`),
+# so it never touches the tunnel.
 
 services:
   web:
@@ -15,6 +20,8 @@ services:
     restart: unless-stopped
     expose:
       - "80"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - glacianav
 
@@ -24,6 +31,18 @@ services:
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
       - web
+    networks:
+      - glacianav
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # If the GHCR package is PRIVATE, mount a docker config with a
+      # read:packages token so watchtower can pull. Public package = not needed.
+      # - ~/.docker/config.json:/config.json:ro
+    command: --interval 60 --cleanup --label-enable
     networks:
       - glacianav
 

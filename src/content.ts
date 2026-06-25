@@ -28,33 +28,37 @@ export const hero = {
   headline: "See the ice before it moves.",
   subtext:
     "The predictive nervous system for winter shipping. AI ice forecasting that routes vessels around danger, hours ahead.",
-  primaryCta: "Join the Baltic Beta",
+  primaryCta: "Contact us",
   secondaryCta: "How it works",
 };
 
 export const problem = {
   headline: "Every winter, ships sail blind.",
   subtext:
-    "Vessels in ice face three compounding crises at once, and the tools on the bridge cannot keep up.",
-  stat: { value: "11,000+", label: "vessels need Baltic ice assistance every winter" },
+    "In ice, the wrong route burns fuel, triggers carbon penalties and risks the hull, while the tools on the bridge lag hours behind a field that shifts by the minute.",
+  stats: [
+    { value: "11,000+", label: "vessels need Baltic ice assistance every winter" },
+    { value: "24h", label: "the age of the ice charts crews still navigate on" },
+    { value: "6h+", label: "that legacy forecast models lag behind reality" },
+  ],
   crises: [
     {
       kicker: "Fuel",
       title: "Exponential burn",
-      body: "Ice multiplies hull resistance and engine load. Every extra tonne of fuel is cost the voyage never planned for.",
-      metric: "↑ load",
+      body: "Ice multiplies hull resistance and engine load. Fuel is already the largest cost of a voyage, and ice makes it climb fast and unpredictably.",
+      metric: "Cost ↑",
     },
     {
       kicker: "Carbon",
       title: "A double penalty",
-      body: "EU ETS now covers shipping. Fuel burned in ice is paid for twice: once at the pump, once in carbon allowances.",
+      body: "The EU Emissions Trading System now covers shipping. Fuel burned forcing through ice is paid for twice: once at the pump, once in carbon allowances.",
       metric: "EU ETS",
     },
     {
       kicker: "Tools",
       title: "Flying blind",
-      body: "Crews navigate on ice charts up to a day old and models that lag hours behind a field that shifts by the minute.",
-      metric: "24h old",
+      body: "Static charts age by the hour and lagging models miss fast ice shifts, so captains commit to routes on information that is already wrong.",
+      metric: "Reactive",
     },
   ],
 };
@@ -90,10 +94,27 @@ export const solution = {
 
 export const stage = {
   headline: "Where we are",
-  status: "MVP in active development",
-  points: [
-    "Building the data pipeline: SAR satellite ingestion fused with oceanographic models.",
-    "Preparing a closed Baltic Beta with selected early-adopter fleets.",
+  subtext:
+    "From a four-year research program to a vessel-ready product, in clear stages.",
+  milestones: [
+    {
+      status: "Done",
+      tone: "done" as const,
+      title: "Research",
+      body: "4+ years at the University of Turku. The core PINN and Vision Transformer models, peer-reviewed and published at IEEE ITSC.",
+    },
+    {
+      status: "In progress",
+      tone: "active" as const,
+      title: "MVP build",
+      body: "SAR satellite ingestion fused with oceanographic models into one live forecasting and routing pipeline.",
+    },
+    {
+      status: "Next",
+      tone: "next" as const,
+      title: "Baltic Beta",
+      body: "A closed pilot with selected early-adopter fleets, validating savings on real winter routes before commercial launch.",
+    },
   ],
 };
 
@@ -140,14 +161,28 @@ export const market = {
 
 export const businessModel = {
   headline: "How we make money",
+  subtext:
+    "Two revenue streams, both built around the only number a fleet cares about: provable savings.",
   streams: [
     {
-      title: "Recurring SaaS",
-      body: "Fleet operators subscribe per vessel, billed annually or by voyage.",
+      tag: "Recurring",
+      title: "SaaS subscription",
+      body: "Fleet operators license GlaciaNav per vessel for live forecasting, routing and iceberg alerts.",
+      points: [
+        "Per-vessel licence",
+        "Billed annually or per voyage",
+        "Scales with the fleet",
+      ],
     },
     {
+      tag: "Aligned",
       title: "Performance fee",
-      body: "An optional cut of the fuel and carbon savings we can prove on the water.",
+      body: "An optional share of the fuel and carbon savings we can prove against each vessel's own baseline.",
+      points: [
+        "Percentage of proven savings",
+        "Measured against a real baseline",
+        "Charged only when we deliver",
+      ],
     },
   ],
   pullQuote: "If the client doesn't save, GlaciaNav doesn't get paid.",
@@ -155,7 +190,7 @@ export const businessModel = {
 
 export const team = {
   headline: "The team",
-  note: "A University of Turku spin-off.",
+  note: "A University of Turku spin-off building deep-tech for the sea.",
   members: [
     { name: "Javad Sheikh", role: "ML Scientist", email: "javad.sheikh@glacianav.com" },
     { name: "Nima Emami", role: "ML Scientist", email: "nima.emami@glacianav.com" },
@@ -184,7 +219,7 @@ export const ask = {
 };
 
 export const contact = {
-  headline: "Join the Baltic Beta",
+  headline: "Contact us",
   subtext:
     "Partner with us to make winter navigation predictable. Tell us about your fleet and we will be in touch.",
 };

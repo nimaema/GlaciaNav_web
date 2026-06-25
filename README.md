@@ -79,7 +79,30 @@ In **Cloudflare Zero Trust > Networks > Tunnels**:
    service to **`http://web:80`** (the compose service name, on the shared
    network). No ports need to be opened on the Hetzner firewall.
 
-## Redeploying after a change
+## Auto-deploy on push (recommended)
+
+The compose stack includes a **watchtower** service that polls GHCR every 60s
+and, when the GitHub Actions build publishes a new `web` image, pulls it and
+restarts the container automatically. So the full flow is:
+
+```
+push to main  ->  Actions builds + pushes image to GHCR  ->  watchtower redeploys
+```
+
+Nothing to run on the server after the initial `docker compose up -d`. Watchtower
+only watches the `web` container (it carries the `watchtower.enable=true` label),
+so the Cloudflare tunnel is never disrupted. If the GHCR package is **private**,
+uncomment the `~/.docker/config.json` mount in `docker-compose.yml` and
+`docker login ghcr.io` once on the server so watchtower can pull.
+
+### Alternative: instant SSH deploy
+
+For zero-delay deploys instead of 60s polling, add an SSH step to the workflow
+that runs `docker compose pull && docker compose up -d` on the server. It needs a
+deploy SSH key in repo secrets and the server reachable over SSH. Watchtower is
+simpler and needs no secrets, so it is the default here.
+
+## Redeploying manually
 
 ```bash
 docker compose pull && docker compose up -d
