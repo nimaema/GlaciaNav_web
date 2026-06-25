@@ -35,7 +35,9 @@ services:
       - glacianav
 
   watchtower:
-    image: containrrr/watchtower
+    # Maintained fork: the original containrrr/watchtower is unmaintained and
+    # speaks Docker API v1.25, which modern daemons reject (need >= 1.40).
+    image: nickfedor/watchtower:latest
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
