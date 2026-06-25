@@ -157,9 +157,9 @@ export const team = {
   headline: "The team",
   note: "A University of Turku spin-off.",
   members: [
-    { name: "Javad Sheikh", role: "Technical Lead", email: "javad.sheikh@glacianav.com" },
-    { name: "Nima Emami", role: "Data Scientist", email: "nima.emami@glacianav.com" },
-    { name: "Sepehr Seifizarei", role: "Data Scientist", email: "sepehr.seifizarei@glacianav.com" },
+    { name: "Javad Sheikh", role: "ML Scientist", email: "javad.sheikh@glacianav.com" },
+    { name: "Nima Emami", role: "ML Scientist", email: "nima.emami@glacianav.com" },
+    { name: "Sepehr Seifizarei", role: "ML Scientist", email: "sepehr.seifizarei@glacianav.com" },
     { name: "Wilma Tiainen", role: "Business Developer", email: "wilma.tiainen@glacianav.com" },
   ],
 };
