@@ -1,0 +1,32 @@
+# GlaciaNav one-pager: static site behind a Cloudflare Tunnel.
+#
+# On the Hetzner server:
+#   1. cp .env.example .env  and fill in the values
+#   2. docker compose pull
+#   3. docker compose up -d
+#
+# Traffic flow:  internet -> Cloudflare -> cloudflared (this host) -> web:80
+# The web container is NOT published to the host; only the tunnel can reach it.
+
+services:
+  web:
+    # Image is built and pushed to GHCR by .github/workflows/deploy.yml
+    image: ${WEB_IMAGE:-ghcr.io/your-org/glacianav-web:latest}
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - glacianav
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
+    networks:
+      - glacianav
+
+networks:
+  glacianav:
+    driver: bridge

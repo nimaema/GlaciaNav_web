@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+.git
+.github
+.claude
+.vscode
+.idea
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Source assets / docs not needed in the image
+visuals.svg
+One-Pager.pdf
+*.md
+docker-compose.yml

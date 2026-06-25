@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Brand type system: Space Grotesk (display) + IBM Plex Sans (body) + IBM Plex Mono (data) */
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Space Grotesk Variable', 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+    --color-brand: var(--brand);
+    --color-brand-strong: var(--brand-strong);
+    --color-brand-ink: var(--brand-ink);
+    --color-brand-surface: var(--brand-surface);
+
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+:root {
+    /* Brand palette, locked. #06ABBA bright teal / #026C7A dark teal / #222221 ink */
+    --brand: #06abba;          /* bright teal: decorative fills, large numerals, icon strokes (not body text) */
+    --brand-strong: #026c7a;   /* dark teal: AA-safe accent text + primary fill */
+    --brand-ink: #023e47;      /* deepest teal: emphasis text */
+    --brand-surface: #eaf6f7;  /* pale teal tint: section bands */
+
+    --background: #f7fafb;      /* cool near-white */
+    --foreground: #1b1c1c;      /* ink */
+    --card: #ffffff;
+    --card-foreground: #1b1c1c;
+    --popover: #ffffff;
+    --popover-foreground: #1b1c1c;
+    --primary: #026c7a;         /* dark teal, ~5.8:1 with white text */
+    --primary-foreground: #ffffff;
+    --secondary: #eaf6f7;       /* pale teal */
+    --secondary-foreground: #024e58;
+    --muted: #eef2f4;           /* cool light gray */
+    --muted-foreground: #4f6066; /* ~6.5:1 on white */
+    --accent: #e2f4f6;          /* light teal hover */
+    --accent-foreground: #024e58;
+    --destructive: #e5484d;
+    --border: #e1e8ea;          /* cool border */
+    --input: #d6dee1;
+    --ring: #06abba;            /* teal focus ring */
+    --radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 26%, transparent);
+    color: var(--brand-ink);
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
