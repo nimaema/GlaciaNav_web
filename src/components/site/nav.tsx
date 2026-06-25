@@ -59,10 +59,18 @@ export function Nav() {
       <nav className="flex w-full max-w-2xl items-center justify-between gap-2 rounded-full border border-border/70 bg-background/75 p-1.5 pl-2.5 shadow-[0_8px_30px_-12px_rgba(2,108,122,0.25)] backdrop-blur-xl md:w-auto md:gap-4">
         <a
           href="#top"
-          className={cn("flex shrink-0 items-center rounded-full", focusRing)}
+          className={cn("flex shrink-0 items-center gap-2 rounded-full pl-0.5", focusRing)}
           aria-label="GlaciaNav home"
         >
-          <img src="/logo-horizontal.svg" alt="GlaciaNav" className="h-6 w-auto md:h-7" />
+          <img
+            src="/logo-icon.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-6 w-auto md:h-7"
+          />
+          <span className="font-heading text-base font-semibold tracking-tight text-foreground md:text-lg">
+            GlaciaNav
+          </span>
         </a>
 
         {/* Links with sliding indicator */}
