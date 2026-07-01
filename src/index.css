@@ -20,6 +20,10 @@
     --color-brand-strong: var(--brand-strong);
     --color-brand-ink: var(--brand-ink);
     --color-brand-surface: var(--brand-surface);
+    --color-signal: var(--signal);
+    --color-signal-strong: var(--signal-strong);
+    --color-panel: var(--panel);
+    --color-abyss: var(--abyss);
 
     --color-ring: var(--ring);
     --color-input: var(--input);
@@ -51,30 +55,37 @@
 }
 
 :root {
-    /* Brand palette, locked. #06ABBA bright teal / #026C7A dark teal / #222221 ink */
-    --brand: #06abba;          /* bright teal: decorative fills, large numerals, icon strokes (not body text) */
-    --brand-strong: #026c7a;   /* dark teal: AA-safe accent text + primary fill */
-    --brand-ink: #023e47;      /* deepest teal: emphasis text */
-    --brand-surface: #eaf6f7;  /* pale teal tint: section bands */
+    /* Polar-night instrument palette. Teal brand luminous on a deep-sea base,
+       amber reserved as a functional signal (route / pressure / alert). */
+    --brand: #06abba;          /* bright teal: decorative fills, icon strokes, glows */
+    --brand-strong: #3fdced;   /* luminous cyan: AA-safe accent TEXT on dark */
+    --brand-ink: #a9eef5;      /* palest ice: emphasis text */
+    --brand-surface: #0a2530;  /* dark teal tint: raised bands */
 
-    --background: #f7fafb;      /* cool near-white */
-    --foreground: #1b1c1c;      /* ink */
-    --card: #ffffff;
-    --card-foreground: #1b1c1c;
-    --popover: #ffffff;
-    --popover-foreground: #1b1c1c;
-    --primary: #026c7a;         /* dark teal, ~5.8:1 with white text */
-    --primary-foreground: #ffffff;
-    --secondary: #eaf6f7;       /* pale teal */
-    --secondary-foreground: #024e58;
-    --muted: #eef2f4;           /* cool light gray */
-    --muted-foreground: #4f6066; /* ~6.5:1 on white */
-    --accent: #e2f4f6;          /* light teal hover */
-    --accent-foreground: #024e58;
-    --destructive: #e5484d;
-    --border: #e1e8ea;          /* cool border */
-    --input: #d6dee1;
-    --ring: #06abba;            /* teal focus ring */
+    --signal: #f2a64b;         /* amber signal: route line, alert states */
+    --signal-strong: #f7bd6e;  /* brighter amber for emphasis */
+
+    --abyss: #03141a;          /* deepest wash for immersive sections */
+    --panel: #072530;          /* elevated panel over the base */
+
+    --background: #04171d;      /* polar night */
+    --foreground: #e9f6f8;      /* ice white */
+    --card: #072028;            /* panel surface */
+    --card-foreground: #e9f6f8;
+    --popover: #082a34;
+    --popover-foreground: #e9f6f8;
+    --primary: #14c0d1;         /* luminous teal fill for CTAs */
+    --primary-foreground: #032027; /* near-black ink on the bright fill */
+    --secondary: #0b2731;       /* dark teal panel */
+    --secondary-foreground: #a9eef5;
+    --muted: #0c2831;           /* cool dark surface */
+    --muted-foreground: #8bb2bc; /* ~7:1 on the polar-night base */
+    --accent: #0f2f3a;          /* teal hover */
+    --accent-foreground: #d6f4f8;
+    --destructive: #ff5a5f;
+    --border: #123540;          /* subtle teal border */
+    --input: #16404c;
+    --ring: #14c0d1;            /* teal focus ring */
     --radius: 0.625rem;
 }
 
