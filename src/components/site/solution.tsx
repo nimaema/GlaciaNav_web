@@ -31,7 +31,7 @@ export function Solution() {
       <ChartGrid tone="light" fade="radial" className="opacity-40" />
       <div className="pointer-events-none absolute left-1/2 top-1/4 size-[42rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--brand)_16%,transparent),transparent_70%)] blur-2xl" />
       <MarkWatermark
-        src="/logo-icon.svg"
+        src="/logo-icon-white-arrow.svg"
         className="absolute -right-20 bottom-10 hidden w-[30rem] opacity-[0.05] invert md:block"
       />
 
