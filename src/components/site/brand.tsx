@@ -151,7 +151,7 @@ export function SpotlightCard({
 
 /** Large faded brand mark used as an ambient watermark. */
 export function MarkWatermark({
-  src = "/logo-icon.svg",
+  src = "/logo-icon-white-arrow.svg",
   className,
   style,
 }: {
