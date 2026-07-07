@@ -40,7 +40,7 @@ export function Footer() {
         <div className="grid grid-cols-1 items-start gap-10 py-14 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
           <div>
             <div className="flex items-center gap-3">
-              <img src="/logo-icon.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
+              <img src="/logo-icon-white-arrow.svg" alt="" aria-hidden="true" className="h-8 w-auto" />
               <span className="font-heading text-xl font-semibold tracking-tight">GlaciaNav</span>
             </div>
             <p className="mt-5 max-w-md font-heading text-xl font-medium leading-snug tracking-tight text-zinc-200 md:text-2xl">
