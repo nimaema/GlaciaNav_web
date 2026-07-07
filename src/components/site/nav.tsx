@@ -63,7 +63,7 @@ export function Nav() {
           aria-label="GlaciaNav home"
         >
           <img
-            src="/logo-icon.svg"
+            src="/logo-icon-white-arrow.svg"
             alt=""
             aria-hidden="true"
             className="h-6 w-auto md:h-7"
