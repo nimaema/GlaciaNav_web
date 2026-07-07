@@ -33,7 +33,7 @@ export const hero = {
 };
 
 export const problem = {
-  headline: "Every winter, ships sail blind.",
+  headline: "Every winter ships sail with outdated sea ice maps!",
   subtext:
     "In ice, the wrong route burns fuel, triggers carbon penalties and risks the hull, while the tools on the bridge lag hours behind a field that shifts by the minute.",
   stats: [
