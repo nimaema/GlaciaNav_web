@@ -121,6 +121,7 @@ export function CountUp({
   className?: string;
 }) {
   const match = value.match(/^(\D*)([\d,]+)(.*)$/);
+  const matched = match !== null;
   const prefix = match?.[1] ?? "";
   const target = match ? parseInt(match[2].replace(/,/g, ""), 10) : 0;
   const suffix = match?.[3] ?? "";
@@ -131,7 +132,7 @@ export function CountUp({
   const [n, setN] = useState(0);
 
   useEffect(() => {
-    if (!match) return;
+    if (!matched) return;
     if (reduce || !inView) {
       if (inView) setN(target);
       return;
@@ -142,7 +143,7 @@ export function CountUp({
       onUpdate: (v) => setN(Math.round(v)),
     });
     return () => controls.stop();
-  }, [inView, reduce, target, match]);
+  }, [inView, reduce, target, matched]);
 
   if (!match) return <span className={className}>{value}</span>;
   return (
@@ -191,11 +192,11 @@ export function SectionHead({
 }) {
   return (
     <div className={cn("max-w-2xl", className)}>
-      <h2 className="font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+      <h2 className="display-condensed text-4xl font-extrabold leading-[0.95] text-ink md:text-5xl">
         {title}
       </h2>
       {intro ? (
-        <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+        <p className="mt-5 text-base leading-relaxed text-ink-soft md:text-lg">
           {intro}
         </p>
       ) : null}

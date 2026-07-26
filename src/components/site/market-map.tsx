@@ -1,20 +1,17 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 /**
- * Arctic expansion map.
- *
- * A stylised top-of-world view. Three coverage rings grow outward from the
- * Baltic as the go-to-market widens — Baltic → Nordic → global winter lanes —
- * with route arcs reaching the target regions. Hovering a phase focuses its
- * ring. Pure SVG; the "landmass" is abstract, not a literal map.
+ * Coverage chart, drawn like a survey figure on paper. Three reach rings grow
+ * outward from the Baltic origin as the go-to-market widens; the third
+ * horizon is dashed chartreuse, the detection color, because it is the one
+ * still being hunted.
  */
 
-// Coverage zones centred on the Baltic (cx,cy in a 0–400 viewBox).
 const CENTER = { x: 176, y: 214 };
-const ZONES = [
-  { r: 46, color: "var(--brand)", nodes: [[150, 190], [196, 176], [168, 240]] },
-  { r: 104, color: "var(--brand-strong)", nodes: [[110, 120], [250, 150], [96, 268]] },
-  { r: 176, color: "var(--signal)", nodes: [[300, 70], [352, 250], [70, 340], [250, 360]] },
+export const ZONES = [
+  { r: 46, color: "var(--strata-4)", nodes: [[150, 190], [196, 176], [168, 240]] },
+  { r: 104, color: "var(--strata-5)", nodes: [[110, 120], [250, 150], [96, 268]] },
+  { r: 176, color: "var(--mask-ink)", nodes: [[300, 70], [352, 250], [70, 340], [250, 360]] },
 ];
 
 export function MarketMap({ active }: { active: number }) {
@@ -22,17 +19,13 @@ export function MarketMap({ active }: { active: number }) {
   return (
     <svg viewBox="0 0 400 400" className="h-full w-full" aria-hidden="true">
       <defs>
-        <radialGradient id="mm-glow" cx="44%" cy="54%" r="60%">
-          <stop offset="0%" stopColor="color-mix(in srgb, var(--brand) 22%, transparent)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-        <pattern id="mm-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0V20" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+        <pattern id="mm-grid" width="25" height="25" patternUnits="userSpaceOnUse">
+          <path d="M25 0H0V25" fill="none" stroke="rgba(11,36,48,0.07)" strokeWidth="1" />
         </pattern>
       </defs>
 
+      <rect width="400" height="400" fill="var(--plate)" />
       <rect width="400" height="400" fill="url(#mm-grid)" />
-      <rect width="400" height="400" fill="url(#mm-glow)" />
 
       {/* meridian sweep lines from the Baltic origin */}
       {Array.from({ length: 12 }).map((_, i) => {
@@ -44,13 +37,13 @@ export function MarketMap({ active }: { active: number }) {
             y1={CENTER.y}
             x2={CENTER.x + Math.cos(a) * 260}
             y2={CENTER.y + Math.sin(a) * 260}
-            stroke="rgba(255,255,255,0.04)"
+            stroke="rgba(11,36,48,0.06)"
             strokeWidth="1"
           />
         );
       })}
 
-      {/* coverage rings, outermost first so labels sit on top */}
+      {/* coverage rings */}
       {ZONES.map((z, i) => {
         const on = i <= active;
         const focused = i === active;
@@ -60,16 +53,15 @@ export function MarketMap({ active }: { active: number }) {
               cx={CENTER.x}
               cy={CENTER.y}
               r={z.r}
-              fill={focused ? "color-mix(in srgb, var(--brand) 6%, transparent)" : "transparent"}
+              fill={focused ? "color-mix(in srgb, var(--mask) 12%, transparent)" : "transparent"}
               stroke={z.color}
               strokeWidth={focused ? 1.75 : 1}
-              strokeDasharray={i === 2 ? "4 4" : undefined}
+              strokeDasharray={i === 2 ? "5 4" : undefined}
               initial={reduce ? false : { scale: 0.4, opacity: 0 }}
-              animate={{ scale: on ? 1 : 0.4, opacity: on ? (focused ? 1 : 0.4) : 0.12 }}
+              animate={{ scale: on ? 1 : 0.4, opacity: on ? (focused ? 1 : 0.45) : 0.12 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               style={{ transformOrigin: `${CENTER.x}px ${CENTER.y}px` }}
             />
-            {/* target nodes + route arcs for this zone */}
             {on
               ? z.nodes.map((n, k) => (
                   <g key={k}>
@@ -82,23 +74,26 @@ export function MarketMap({ active }: { active: number }) {
                       strokeWidth="1"
                       opacity={focused ? 0.5 : 0.18}
                     />
-                    <motion.circle
-                      cx={n[0]}
-                      cy={n[1]}
-                      r={focused ? 3.5 : 2.5}
+                    <motion.rect
+                      x={n[0] - 3}
+                      y={n[1] - 3}
+                      width={focused ? 7 : 5}
+                      height={focused ? 7 : 5}
                       fill={z.color}
                       initial={reduce ? false : { scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.2 + k * 0.08, type: "spring", stiffness: 300 }}
+                      style={{ transformOrigin: `${n[0]}px ${n[1]}px` }}
                     />
                     {focused && !reduce ? (
-                      <motion.circle
-                        cx={n[0]}
-                        cy={n[1]}
-                        r={3.5}
+                      <motion.rect
+                        x={n[0] - 4}
+                        y={n[1] - 4}
+                        width={8}
+                        height={8}
                         fill="none"
                         stroke={z.color}
-                        animate={{ scale: [1, 2.6], opacity: [0.7, 0] }}
+                        animate={{ scale: [1, 2.4], opacity: [0.7, 0] }}
                         transition={{ duration: 1.8, repeat: Number.POSITIVE_INFINITY, delay: k * 0.3 }}
                         style={{ transformOrigin: `${n[0]}px ${n[1]}px` }}
                       />
@@ -111,8 +106,8 @@ export function MarketMap({ active }: { active: number }) {
       })}
 
       {/* origin: the Baltic beachhead */}
-      <circle cx={CENTER.x} cy={CENTER.y} r={5} fill="var(--brand)" />
-      <circle cx={CENTER.x} cy={CENTER.y} r={5} fill="none" stroke="var(--brand)" strokeOpacity="0.4" strokeWidth="6" />
+      <rect x={CENTER.x - 5} y={CENTER.y - 5} width={10} height={10} fill="var(--ink)" />
+      <rect x={CENTER.x - 8} y={CENTER.y - 8} width={16} height={16} fill="none" stroke="var(--ink)" strokeOpacity="0.35" strokeWidth="2" />
     </svg>
   );
 }

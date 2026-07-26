@@ -8,11 +8,12 @@
 export const meta = {
   name: "GlaciaNav",
   tagline:
-    "Navigating the path of least resistance through proactive AI ice forecasting.",
-  descriptor: "The predictive nervous system for winter shipping.",
+    "AI ice forecasting for maritime: detection, thickness and drift, hours ahead.",
+  descriptor: "The predictive ice picture for winter shipping.",
   location: "Turku, Finland",
   email: "info@glacianav.com",
-  lastUpdated: "June 25, 2026",
+  linkedin: "https://www.linkedin.com/company/glacianav/",
+  lastUpdated: "July 27, 2026",
 };
 
 export const nav = [
@@ -25,17 +26,17 @@ export const nav = [
 
 export const hero = {
   eyebrow: "Deep-tech AI · Turku, Finland",
-  headline: "See the ice before it moves.",
+  headline: "AI ice forecasting for maritime.",
   subtext:
-    "The predictive nervous system for winter shipping. AI ice forecasting that routes vessels around danger, hours ahead.",
+    "We detect the ice, measure its thickness and forecast its drift from all-weather satellite radar, so the bridge sees the field as it will be, not as it was.",
   primaryCta: "Contact us",
   secondaryCta: "How it works",
 };
 
 export const problem = {
-  headline: "Every winter, ships sail blind.",
+  headline: "Ships sail with outdated data.",
   subtext:
-    "In ice, the wrong route burns fuel, triggers carbon penalties and risks the hull, while the tools on the bridge lag hours behind a field that shifts by the minute.",
+    "In ice, unknown thickness burns fuel, triggers carbon penalties and risks the hull, while the tools on the bridge lag hours behind a field that shifts by the minute.",
   stats: [
     { value: "11,000+", label: "vessels need Baltic ice assistance every winter" },
     { value: "24h", label: "the age of the ice charts crews still navigate on" },
@@ -56,38 +57,41 @@ export const problem = {
     },
     {
       kicker: "Tools",
-      title: "Flying blind",
-      body: "Static charts age by the hour and lagging models miss fast ice shifts, so captains commit to routes on information that is already wrong.",
+      title: "Navigating blind",
+      body: "Static charts age by the hour and lagging models miss fast ice shifts, so captains commit on information that is already wrong.",
       metric: "Reactive",
     },
   ],
 };
 
 export const solution = {
-  headline: "A predictive nervous system, not a static chart.",
+  headline: "A live ice picture, not a static chart.",
   subtext:
-    "GlaciaNav fuses Physics-Informed Neural Networks with Vision Transformers that read continuous SAR satellite radar. SAR sees through cloud and polar darkness, so the forecast never goes blind.",
+    "GlaciaNav reads continuous SAR satellite radar to detect the ice, estimate how thick it is and forecast where it drifts. SAR sees through cloud and polar darkness, so the picture never goes blind.",
   benefits: [
-    { title: "Lower fuel burn", note: "Route through least resistance." },
-    { title: "Avoid carbon penalties", note: "Cut avoidable EU ETS exposure." },
-    { title: "Protect the hull", note: "Steer clear of compression zones." },
+    { title: "Lower fuel burn", note: "See where ice resistance is lowest." },
+    { title: "Avoid carbon penalties", note: "Cut EU ETS costs with lower emissions." },
+    { title: "Protect the hull", note: "Steer clear of multiyear and packed ice." },
   ],
+  /** Wilma: the savings are a working hypothesis until the Baltic Beta measures them. */
+  benefitsNote:
+    "Working hypothesis, to be measured against real vessel baselines in the Baltic Beta.",
   flagship: {
     title: "Iceberg movement prediction",
-    body: "Detect every iceberg in all-weather radar, forecast its drift hours ahead, alert when one enters the planned corridor, and reroute around it automatically.",
+    body: "Detect every iceberg in all-weather radar, forecast its drift hours ahead, and alert the bridge when one enters the planned corridor.",
   },
   howItWorks: [
     {
-      title: "Physics-Informed Neural Networks",
-      body: "Navier-Stokes, ice rheology and thermodynamics live inside the model, so forecasts stay physically consistent even where data is sparse.",
+      title: "Ice detection",
+      body: "A proprietary encoder-decoder model classifies ridges, leads, floes and compression zones from all-weather radar, day or night, across an entire ice field.",
     },
     {
-      title: "Vision Transformers on SAR imagery",
-      body: "A proprietary ViT classifies ridges, leads, floes and compression zones from all-weather radar, day or night, across an entire ice field.",
+      title: "Ice thickness",
+      body: "Thickness and concentration estimated across the whole field rather than a handful of measured points, updated as each new satellite pass lands, with confidence attached.",
     },
     {
-      title: "Dynamic route optimization",
-      body: "Ice thickness, fuel, ETA and carbon cost resolve into one continuously updated path of least resistance, with hull-load estimation and multi-hour ice forecasts.",
+      title: "Drift forecast",
+      body: "Water current, wind speed and direction, and wave information drive a physics-informed model, so the forecast stays physically consistent even where data is sparse.",
     },
   ],
 };
@@ -95,25 +99,25 @@ export const solution = {
 export const stage = {
   headline: "Where we are",
   subtext:
-    "From a four-year research program to a vessel-ready product, in clear stages.",
+    "From a two-year research program to a vessel-ready product, in clear stages.",
   milestones: [
     {
       status: "Done",
       tone: "done" as const,
       title: "Research",
-      body: "4+ years at the University of Turku. The core PINN and Vision Transformer models, peer-reviewed and published at IEEE ITSC.",
+      body: "2+ years at the University of Turku. The core encoder-decoder and physics-informed models, peer-reviewed and published at IEEE ITSC.",
     },
     {
       status: "In progress",
       tone: "active" as const,
       title: "MVP build",
-      body: "SAR satellite ingestion fused with oceanographic models into one live forecasting and routing pipeline.",
+      body: "SAR satellite ingestion fused with oceanographic models into one live detection, thickness and drift forecasting pipeline.",
     },
     {
       status: "Next",
       tone: "next" as const,
       title: "Baltic Beta",
-      body: "A closed pilot with selected early-adopter fleets, validating savings on real winter routes before commercial launch.",
+      body: "A closed pilot with selected early-adopter fleets, measuring forecast accuracy and the savings hypothesis on real winter voyages.",
     },
   ],
 };
@@ -123,7 +127,7 @@ export const traction = {
   items: [
     {
       kicker: "University of Turku",
-      body: "Core technology from 4+ years of academic research and development.",
+      body: "Core technology from 2+ years of academic research and development.",
     },
     {
       kicker: "IEEE ITSC",
@@ -131,7 +135,7 @@ export const traction = {
     },
     {
       kicker: "Industry validation",
-      body: "Pressure-tested with fleet managers, ice-navigation specialists and the Icelandic Coast Guard.",
+      body: "Validated with icebreaker captains, ice-navigation solution providers and the Icelandic Coast Guard.",
     },
   ],
 };
@@ -139,22 +143,22 @@ export const traction = {
 export const market = {
   headline: "The market is large, and the timing is now.",
   whyNow:
-    "EU ETS now prices the carbon that ice wastes, so the fuel and emissions GlaciaNav saves are bankable today, not someday.",
+    "EU ETS now prices the carbon that ice wastes, so every tonne of fuel burned forcing through it is paid for twice. Better ice information is worth money today, not someday.",
   phases: [
     {
       no: "01",
       title: "Baltic early adopters",
-      body: "Land the first fleets in the Baltic. ESL Shipping, Finnlines and peers.",
+      body: "Land the first icebreaker fleets: Arctia Oy and the Swedish icebreakers.",
     },
     {
       no: "02",
-      title: "Nordic winter fleet",
-      body: "Expand to full coverage of the Nordic winter shipping season.",
+      title: "Norwegian and Greenland seas",
+      body: "Take the AI north, where the ice is harder, the charts are thinner and satellite radar is the only reliable eye.",
     },
     {
       no: "03",
       title: "Global winter lanes",
-      body: "Gulf of St. Lawrence, the Northern Sea Route and Antarctic supply runs.",
+      body: "The Northeast Passage and the world's other winter shipping lanes.",
     },
   ],
 };
@@ -162,12 +166,12 @@ export const market = {
 export const businessModel = {
   headline: "How we make money",
   subtext:
-    "Two revenue streams, both built around the only number a fleet cares about: provable savings.",
+    "Subscription only. Buy the platform, or buy the forecast as data and run it inside your own systems.",
   streams: [
     {
       tag: "Recurring",
       title: "SaaS subscription",
-      body: "Fleet operators license GlaciaNav per vessel for live forecasting, routing and iceberg alerts.",
+      body: "Fleet operators license GlaciaNav per vessel for live ice detection, thickness and drift forecasts, with iceberg alerts.",
       points: [
         "Per-vessel licence",
         "Billed annually or per voyage",
@@ -175,17 +179,16 @@ export const businessModel = {
       ],
     },
     {
-      tag: "Aligned",
-      title: "Performance fee",
-      body: "An optional share of the fuel and carbon savings we can prove against each vessel's own baseline.",
+      tag: "Recurring",
+      title: "Data subscription",
+      body: "The same detection, thickness and drift forecasts delivered as a feed into an operator's own bridge software or planning tools.",
       points: [
-        "Percentage of proven savings",
-        "Measured against a real baseline",
-        "Charged only when we deliver",
+        "API and data feed",
+        "Priced by area and refresh rate",
+        "Runs inside existing tools",
       ],
     },
   ],
-  pullQuote: "If the client doesn't save, GlaciaNav doesn't get paid.",
 };
 
 export const team = {
@@ -212,8 +215,8 @@ export const ask = {
       body: "How do we structure and negotiate a first paid pilot agreement?",
     },
     {
-      title: "Shadow-routing pricing",
-      body: "How should we price a shadow-routing pilot that proves savings before go-live?",
+      title: "Pricing the forecast",
+      body: "How should we price an ice-forecast subscription before the savings are proven?",
     },
   ],
 };
@@ -221,5 +224,5 @@ export const ask = {
 export const contact = {
   headline: "Contact us",
   subtext:
-    "Partner with us to make winter navigation predictable. Tell us about your fleet and we will be in touch.",
+    "Partner with us to make the winter ice picture predictable. Tell us about your fleet and we will be in touch.",
 };

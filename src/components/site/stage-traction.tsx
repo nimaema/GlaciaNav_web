@@ -1,136 +1,132 @@
-import { lazy, Suspense } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, Navigation, Dot } from "lucide-react";
+import { Check } from "lucide-react";
 import { stage, traction } from "@/content";
 import { Reveal, Section, SectionHead, Stagger, StaggerItem } from "./reveal";
-import { HexMarker } from "./brand";
+import { DataLabel } from "./brand";
 
-// three.js is heavy: load it lazily so it never blocks first paint.
-const DottedSurface = lazy(() =>
-  import("./dotted-surface").then((m) => ({ default: m.DottedSurface }))
-);
+/**
+ * Where we are: an expedition rail. Three legs on one line, the cyan fill
+ * drawn exactly as far as the work has actually gone. Each leg is a plate
+ * with its status; the active leg carries the mask. Below, the credentials
+ * strip: what the program has already proven.
+ */
 
 type Tone = "done" | "active" | "next";
 
-const toneMeta: Record<Tone, { icon: typeof Check; ring: string; text: string }> = {
-  done: { icon: Check, ring: "border-brand bg-brand/15 text-brand", text: "text-brand-strong" },
-  active: { icon: Navigation, ring: "border-brand bg-brand/20 text-brand", text: "text-brand-strong" },
-  next: { icon: Dot, ring: "border-border bg-abyss text-muted-foreground", text: "text-muted-foreground" },
-};
-
-function Waypoint({ tone, last, index }: { tone: Tone; last: boolean; index: number }) {
-  const reduce = useReducedMotion();
-  const m = toneMeta[tone];
-  const Icon = m.icon;
-  // Line below a marker is "sailed" (teal) once we're at or past the active leg.
-  const sailed = tone === "done";
+function Node({ tone }: { tone: Tone }) {
   return (
-    <div className="relative flex flex-col items-center">
-      <span className="relative flex size-12 items-center justify-center">
-        {tone === "active" && !reduce ? (
-          <motion.span
-            className="absolute inset-0 hex-clip bg-brand/30"
-            animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
-          />
-        ) : null}
-        <span className={`absolute inset-0 hex-clip border ${m.ring}`} />
-        <Icon className="relative size-5" strokeWidth={2} />
-        <span className="absolute -right-1.5 -top-1.5 font-mono text-[0.55rem] text-brand/70">
-          0{index + 1}
-        </span>
-      </span>
-      {!last ? (
-        <span className="relative mt-1 w-px flex-1">
-          <span className="absolute inset-0 bg-border" />
-          <span className={`absolute inset-0 ${sailed ? "bg-brand" : "bg-transparent"}`} />
-        </span>
-      ) : null}
-    </div>
+    <span
+      className={
+        tone === "done"
+          ? "flex size-8 shrink-0 items-center justify-center border border-ink bg-ink text-paper"
+          : tone === "active"
+          ? "flex size-8 shrink-0 items-center justify-center border border-ink bg-mask"
+          : "flex size-8 shrink-0 items-center justify-center border border-ink/40 bg-plate"
+      }
+    >
+      {tone === "done" ? <Check className="size-4" strokeWidth={2.5} /> : null}
+      {tone === "active" ? <span className="size-2 bg-ink" /> : null}
+    </span>
+  );
+}
+
+function StatusChip({ tone, label }: { tone: Tone; label: string }) {
+  return (
+    <span
+      className={`inline-flex w-fit items-center border px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.12em] ${
+        tone === "active"
+          ? "border-ink/60 bg-mask text-ink"
+          : tone === "done"
+          ? "border-ink/40 text-ink"
+          : "border-ink/25 text-ink-faint"
+      }`}
+    >
+      {label}
+    </span>
   );
 }
 
 export function StageTraction() {
+  const reduce = useReducedMotion();
+
   return (
     <Section id="traction" className="relative overflow-hidden">
-      <Suspense fallback={null}>
-        <DottedSurface className="[mask-image:radial-gradient(120%_95%_at_70%_20%,#000_20%,transparent_78%)]" />
-      </Suspense>
+      <Reveal>
+        <SectionHead title={stage.headline} intro={stage.subtext} />
+      </Reveal>
 
-      <div className="relative grid grid-cols-1 gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-        <Reveal>
-          <p className="inline-flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.24em] text-brand-strong">
-            <HexMarker />
-            Passage plan
-          </p>
-          <h2 className="mt-5 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl">
-            {stage.headline}
-          </h2>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
-            {stage.subtext}
-          </p>
+      {/* The rail, desktop: one line, filled as far as the work has gone */}
+      <div className="mt-14 hidden md:block">
+        <div className="grid grid-cols-3 gap-x-8">
+          {stage.milestones.map((m, i) => {
+            const tone = m.tone as Tone;
+            const last = i === stage.milestones.length - 1;
+            return (
+              <div key={m.title} className="relative">
+                {/* rail segment from this node to the next */}
+                {!last ? (
+                  <span className="absolute left-10 right-[-2rem] top-4 h-px bg-ink/15" aria-hidden="true" />
+                ) : null}
+                {tone === "done" ? (
+                  <motion.span
+                    aria-hidden="true"
+                    className="absolute left-10 right-[-2rem] top-4 h-[2px] origin-left bg-mask"
+                    initial={reduce ? false : { scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: true, amount: 0.6 }}
+                    transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                ) : null}
+                <Node tone={tone} />
+                <div className={`mt-5 border-l-2 pl-4 ${tone === "active" ? "border-mask" : "border-ink/10"}`}>
+                  <StatusChip tone={tone} label={m.status} />
+                  <h3 className="display-condensed mt-2.5 text-2xl font-extrabold text-ink">
+                    {m.title}
+                  </h3>
+                  <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">{m.body}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-          {/* current-leg readout */}
-          <div className="mt-8 inline-flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/[0.06] px-4 py-3">
-            <Navigation className="size-4 text-brand" strokeWidth={2} />
-            <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-brand-strong">
-              Current leg · MVP build
-            </span>
+      {/* The rail, mobile: vertical */}
+      <Stagger className="mt-12 flex flex-col gap-9 md:hidden">
+        {stage.milestones.map((m) => {
+          const tone = m.tone as Tone;
+          return (
+            <StaggerItem key={m.title}>
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <Node tone={tone} />
+                  <span className={`mt-1 w-px flex-1 ${tone === "done" ? "bg-mask" : "bg-ink/15"}`} />
+                </div>
+                <div className="pb-1">
+                  <StatusChip tone={tone} label={m.status} />
+                  <h3 className="display-condensed mt-2 text-2xl font-extrabold text-ink">{m.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-soft">{m.body}</p>
+                </div>
+              </div>
+            </StaggerItem>
+          );
+        })}
+      </Stagger>
+
+      {/* What we have proven: the credentials strip */}
+      <Reveal delay={0.05}>
+        <div className="mt-20 border-t-2 border-ink pt-8">
+          <p className="display-condensed text-xl font-extrabold text-ink">{traction.headline}</p>
+          <div className="mt-6 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:divide-x sm:divide-ink/15">
+            {traction.items.map((item, i) => (
+              <div key={item.kicker} className={i > 0 ? "sm:pl-8" : ""}>
+                <DataLabel className="text-mask-ink">{item.kicker}</DataLabel>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-ink-soft">{item.body}</p>
+              </div>
+            ))}
           </div>
-        </Reveal>
-
-        {/* The plotted course */}
-        <Stagger className="relative">
-          {stage.milestones.map((mstone, i) => (
-            <StaggerItem key={mstone.title}>
-              <div className="grid grid-cols-[3rem_1fr] gap-x-5">
-                <Waypoint tone={mstone.tone} last={i === stage.milestones.length - 1} index={i} />
-                <div className={`pb-10 ${i === stage.milestones.length - 1 ? "pb-0" : ""}`}>
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="font-heading text-xl font-semibold text-foreground">
-                      {mstone.title}
-                    </h3>
-                    <span
-                      className={`rounded-full border px-2.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.12em] ${
-                        mstone.tone === "next"
-                          ? "border-border text-muted-foreground"
-                          : "border-brand/40 text-brand-strong"
-                      }`}
-                    >
-                      {mstone.status}
-                    </span>
-                  </div>
-                  <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                    {mstone.body}
-                  </p>
-                </div>
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
-
-      {/* What we have proven — ship's log of credentials */}
-      <div className="relative mt-20">
-        <Reveal>
-          <SectionHead title={traction.headline} />
-        </Reveal>
-        <Stagger className="mt-8 grid grid-cols-1 divide-y divide-border border-y border-border md:grid-cols-3 md:divide-x md:divide-y-0">
-          {traction.items.map((item) => (
-            <StaggerItem key={item.kicker}>
-              <div className="group flex h-full flex-col gap-3 p-6 transition-colors hover:bg-card/50">
-                <div className="flex items-center gap-2">
-                  <HexMarker />
-                  <span className="font-mono text-xs uppercase tracking-[0.14em] text-brand-strong">
-                    {item.kicker}
-                  </span>
-                </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </div>
+        </div>
+      </Reveal>
     </Section>
   );
 }

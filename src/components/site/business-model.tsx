@@ -1,37 +1,37 @@
-import { RefreshCw, Percent, Check } from "lucide-react";
+import { RefreshCw, Antenna, Check } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { businessModel } from "@/content";
 import { Reveal, Section, SectionHead } from "./reveal";
-import { HexIcon, MarkWatermark } from "./brand";
-import { TiltCard } from "./cards";
+import { MaskChip } from "./brand";
 
-const streamIcons = [RefreshCw, Percent];
+const streamIcons = [RefreshCw, Antenna];
 
 /**
- * The savings gap: baseline voyage fuel vs the optimized route. The delta is
- * the only number a fleet cares about — and where GlaciaNav's two revenue
- * streams live (a base licence, plus a share of the proven delta).
+ * The savings hypothesis: baseline voyage fuel vs the same voyage sailed with
+ * a live ice picture. The delta is explicitly unproven, and revenue does not
+ * depend on it: the subscription does.
  */
-function SavingsGap() {
+function SavingsHypothesis() {
   const reduce = useReducedMotion();
-  const optimized = 91; // % of baseline after routing → 9% proven savings
+  const informed = 91; // % of baseline, the hypothesised delta
   return (
-    <div className="rounded-3xl border border-border bg-abyss p-6 md:p-8">
-      <div className="flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.16em]">
-        <span className="text-muted-foreground">Voyage fuel · per vessel</span>
-        <span className="text-signal">−{100 - optimized}% proven</span>
+    <div className="rounded-lg border border-ink/70 bg-plate p-6 md:p-8">
+      <div className="flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.14em]">
+        <span className="text-ink-faint">Voyage fuel · per vessel</span>
+        <span className="inline-flex items-center gap-1.5 border border-ink/50 bg-mask px-2 py-0.5 text-ink">
+          Hypothesis
+        </span>
       </div>
 
       <div className="mt-6 space-y-5">
-        {/* Baseline */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Baseline route</span>
+          <div className="mb-1.5 flex items-center justify-between text-xs text-ink-soft">
+            <span>Baseline voyage</span>
             <span className="font-mono">100</span>
           </div>
-          <div className="h-6 overflow-hidden rounded-md bg-white/[0.04]">
+          <div className="h-6 overflow-hidden border border-ink/25 bg-paper-deep">
             <motion.div
-              className="h-full rounded-md bg-gradient-to-r from-white/15 to-white/25"
+              className="h-full bg-strata-2"
               initial={reduce ? false : { width: 0 }}
               whileInView={{ width: "100%" }}
               viewport={{ once: true }}
@@ -40,24 +40,23 @@ function SavingsGap() {
           </div>
         </div>
 
-        {/* With GlaciaNav + the savings zone */}
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="text-brand-strong">With GlaciaNav</span>
-            <span className="font-mono text-brand-strong">{optimized}</span>
+            <span className="font-medium text-ink">With GlaciaNav</span>
+            <span className="font-mono text-ink">{informed}</span>
           </div>
-          <div className="relative flex h-6 overflow-hidden rounded-md bg-white/[0.04]">
+          <div className="relative flex h-6 overflow-hidden border border-ink/25 bg-paper-deep">
             <motion.div
-              className="h-full bg-gradient-to-r from-brand-strong/70 to-brand/70"
+              className="h-full bg-strata-4"
               initial={reduce ? false : { width: 0 }}
-              whileInView={{ width: `${optimized}%` }}
+              whileInView={{ width: `${informed}%` }}
               viewport={{ once: true }}
               transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             />
-            {/* savings delta — hatched amber */}
+            {/* the unproven delta, masked chartreuse */}
             <motion.div
-              className="h-full border-l border-signal/60 bg-[repeating-linear-gradient(45deg,color-mix(in_srgb,var(--signal)_22%,transparent)_0,color-mix(in_srgb,var(--signal)_22%,transparent)_4px,transparent_4px,transparent_8px)]"
-              style={{ width: `${100 - optimized}%` }}
+              className="h-full border-l border-ink/40 bg-[repeating-linear-gradient(45deg,var(--mask)_0,var(--mask)_4px,transparent_4px,transparent_8px)]"
+              style={{ width: `${100 - informed}%` }}
               initial={reduce ? false : { opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -66,19 +65,18 @@ function SavingsGap() {
           </div>
           <div className="mt-2 flex justify-end">
             <span
-              className="font-mono text-[0.62rem] uppercase tracking-[0.14em] text-signal"
-              style={{ width: `${100 - optimized}%`, textAlign: "center" }}
+              className="font-mono text-[0.62rem] uppercase tracking-[0.12em] text-mask-ink"
+              style={{ width: `${100 - informed}%`, textAlign: "center" }}
             >
-              ↑ savings
+              ↑ unproven
             </span>
           </div>
         </div>
       </div>
 
-      <p className="mt-5 border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground">
-        A per-vessel licence runs the platform. The performance fee is only a{" "}
-        <span className="text-signal">share of that amber delta</span> — measured against the
-        vessel's own baseline.
+      <p className="mt-5 border-t border-ink/15 pt-4 text-sm leading-relaxed text-ink-soft">
+        We charge a subscription, not a cut of the fuel bill. The chartreuse delta is a
+        hypothesis the Baltic Beta is designed to measure against each vessel's own baseline.
       </p>
     </div>
   );
@@ -88,26 +86,27 @@ function Stream({ index }: { index: number }) {
   const stream = businessModel.streams[index];
   const Icon = streamIcons[index];
   return (
-    <TiltCard className="h-full">
+    <div className="flex h-full flex-col rounded-lg border border-ink/70 bg-plate p-6 md:p-7">
       <div className="flex items-center justify-between">
-        <HexIcon tone="glass" className="size-12">
+        <span className="flex size-11 items-center justify-center border border-ink bg-paper text-ink">
           <Icon className="size-5" strokeWidth={1.75} />
-        </HexIcon>
-        <span className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-brand">
+        </span>
+        <span className="inline-flex items-center gap-1.5 border border-ink/40 px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.12em] text-ink-soft">
+          <MaskChip className="size-2" />
           {stream.tag}
         </span>
       </div>
-      <h3 className="mt-5 font-heading text-xl font-semibold text-white">{stream.title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-300">{stream.body}</p>
-      <ul className="mt-5 flex flex-col gap-2.5 border-t border-white/10 pt-5">
+      <h3 className="display-condensed mt-5 text-2xl font-extrabold text-ink">{stream.title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">{stream.body}</p>
+      <ul className="mt-5 flex flex-col gap-2.5 border-t border-ink/15 pt-5">
         {stream.points.map((point) => (
-          <li key={point} className="flex items-center gap-2.5 text-sm text-zinc-200">
-            <Check className="size-4 shrink-0 text-brand" strokeWidth={2.25} />
+          <li key={point} className="flex items-center gap-2.5 text-sm text-ink">
+            <Check className="size-4 shrink-0 text-mask-ink" strokeWidth={2.25} />
             {point}
           </li>
         ))}
       </ul>
-    </TiltCard>
+    </div>
   );
 }
 
@@ -119,7 +118,7 @@ export function BusinessModel() {
           <SectionHead title={businessModel.headline} intro={businessModel.subtext} />
         </Reveal>
         <Reveal delay={0.1}>
-          <SavingsGap />
+          <SavingsHypothesis />
         </Reveal>
       </div>
 
@@ -131,17 +130,6 @@ export function BusinessModel() {
           <Stream index={1} />
         </Reveal>
       </div>
-
-      {/* Pull quote */}
-      <Reveal delay={0.1}>
-        <div className="relative mt-8 overflow-hidden rounded-3xl border border-signal/25 bg-gradient-to-br from-signal/[0.06] to-card px-7 py-12 text-center md:py-16">
-          <MarkWatermark src="/favicon.svg" className="absolute -right-10 -top-10 w-48 opacity-[0.05]" />
-          <MarkWatermark src="/favicon.svg" className="absolute -bottom-12 -left-10 w-44 opacity-[0.04]" />
-          <p className="relative mx-auto max-w-3xl text-balance font-heading text-2xl font-medium leading-snug tracking-tight text-foreground md:text-[2rem]">
-            “{businessModel.pullQuote}”
-          </p>
-        </div>
-      </Reveal>
     </Section>
   );
 }

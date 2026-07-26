@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { nav, hero } from "@/content";
 import { cn } from "@/lib/utils";
@@ -7,10 +7,18 @@ import { cn } from "@/lib/utils";
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+/**
+ * Floe nav: a slim survey-sheet header. Ink wordmark, mono section links with a
+ * chartreuse indicator that slides under the active section, mask-filled CTA.
+ */
 export function Nav() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<number | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+
+  // Reading progress through the survey, drawn as a mask hairline under the bar.
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, restDelta: 0.001 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -34,7 +42,7 @@ export function Nav() {
     return () => observer.disconnect();
   }, []);
 
-  // Slide the indicator to the hovered link, or the active section.
+  // Slide the mask indicator under the hovered link, or the active section.
   useEffect(() => {
     const target = hover ?? active;
     const update = () => {
@@ -55,33 +63,33 @@ export function Nav() {
   const target = hover ?? active;
 
   return (
-    <header className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
-      <nav className="flex w-full max-w-2xl items-center justify-between gap-2 rounded-full border border-border/70 bg-background/75 p-1.5 pl-2.5 shadow-[0_8px_30px_-12px_rgba(2,108,122,0.25)] backdrop-blur-xl md:w-auto md:gap-4">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-paper/85 backdrop-blur-md">
+      <motion.span
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-mask"
+        style={{ scaleX: progress }}
+      />
+      <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-5 md:px-8">
         <a
           href="#top"
-          className={cn("flex shrink-0 items-center gap-2 rounded-full pl-0.5", focusRing)}
+          className={cn("flex shrink-0 items-center gap-2.5", focusRing)}
           aria-label="GlaciaNav home"
         >
-          <img
-            src="/logo-icon.svg"
-            alt=""
-            aria-hidden="true"
-            className="h-6 w-auto md:h-7"
-          />
-          <span className="font-heading text-base font-semibold tracking-tight text-foreground md:text-lg">
+          <img src="/logo-icon.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
+          <span className="display-condensed text-lg font-extrabold text-ink">
             GlaciaNav
           </span>
         </a>
 
-        {/* Links with sliding indicator */}
+        {/* Links with sliding mask underline */}
         <div
           ref={containerRef}
           onMouseLeave={() => setHover(null)}
-          className="relative hidden items-center md:flex"
+          className="relative hidden h-full items-stretch md:flex"
         >
           <motion.span
             aria-hidden="true"
-            className="absolute top-1/2 -z-0 h-9 -translate-y-1/2 rounded-full bg-brand/12"
+            className="absolute bottom-0 h-[3px] bg-mask"
             animate={{ left: indicator.left, width: indicator.width, opacity: indicator.opacity }}
             transition={{ type: "spring", stiffness: 400, damping: 32 }}
           />
@@ -94,10 +102,8 @@ export function Nav() {
               href={item.href}
               onMouseEnter={() => setHover(index)}
               className={cn(
-                "relative z-10 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
-                target === index
-                  ? "text-brand-strong"
-                  : "text-muted-foreground hover:text-foreground",
+                "relative z-10 flex items-center px-3.5 font-mono text-[0.72rem] uppercase tracking-[0.12em] transition-colors",
+                target === index ? "text-ink" : "text-ink-soft hover:text-ink",
                 focusRing
               )}
             >
@@ -109,7 +115,7 @@ export function Nav() {
         <a
           href="#contact"
           className={cn(
-            "hidden h-9 shrink-0 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground transition-transform duration-150 hover:bg-primary/90 active:scale-[0.98] md:inline-flex",
+            "hidden h-9 shrink-0 items-center rounded-sm bg-primary px-4 text-sm font-semibold text-primary-foreground transition-transform duration-150 hover:brightness-105 active:scale-[0.98] md:inline-flex",
             focusRing
           )}
         >
@@ -121,7 +127,7 @@ export function Nav() {
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            "inline-flex size-9 items-center justify-center rounded-full text-foreground md:hidden",
+            "inline-flex size-9 items-center justify-center rounded-sm text-ink md:hidden",
             focusRing
           )}
           aria-label={open ? "Close menu" : "Open menu"}
@@ -133,31 +139,31 @@ export function Nav() {
 
       {/* Mobile menu */}
       {open ? (
-        <div className="absolute inset-x-4 top-[4.5rem] rounded-2xl border border-border bg-background/95 p-2 shadow-xl backdrop-blur-xl md:hidden">
-          <ul className="flex flex-col gap-1">
+        <div className="border-t border-border bg-paper px-4 py-3 md:hidden">
+          <ul className="flex flex-col">
             {nav.map((item, index) => (
               <li key={item.href}>
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "block rounded-xl px-3 py-3 text-sm font-medium transition-colors",
-                    active === index
-                      ? "bg-brand/12 text-brand-strong"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                    "block border-b border-border px-1 py-3.5 font-mono text-[0.78rem] uppercase tracking-[0.12em] transition-colors",
+                    active === index ? "text-ink" : "text-ink-soft",
                     focusRing
                   )}
                 >
-                  {item.label}
+                  <span className={active === index ? "mask-highlight" : undefined}>
+                    {item.label}
+                  </span>
                 </a>
               </li>
             ))}
-            <li className="pt-1">
+            <li className="pt-3">
               <a
                 href="#contact"
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground",
+                  "flex h-11 items-center justify-center rounded-sm bg-primary px-4 text-sm font-semibold text-primary-foreground",
                   focusRing
                 )}
               >

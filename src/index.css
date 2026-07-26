@@ -1,29 +1,32 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Brand type system: Space Grotesk (display) + IBM Plex Sans (body) + IBM Plex Mono (data) */
-@import "@fontsource-variable/space-grotesk";
-@import "@fontsource/ibm-plex-sans/400.css";
-@import "@fontsource/ibm-plex-sans/500.css";
-@import "@fontsource/ibm-plex-sans/600.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
+/* Floe type system: Archivo (condensed display, wdth axis) + Schibsted Grotesk (body) + Space Mono (survey data) */
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/schibsted-grotesk";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-heading: 'Space Grotesk Variable', 'IBM Plex Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Archivo Variable', 'Schibsted Grotesk Variable', sans-serif;
+    --font-mono: 'Space Mono', ui-monospace, monospace;
 
-    --color-brand: var(--brand);
-    --color-brand-strong: var(--brand-strong);
-    --color-brand-ink: var(--brand-ink);
-    --color-brand-surface: var(--brand-surface);
-    --color-signal: var(--signal);
-    --color-signal-strong: var(--signal-strong);
-    --color-panel: var(--panel);
-    --color-abyss: var(--abyss);
+    --color-mask: var(--mask);
+    --color-mask-ink: var(--mask-ink);
+    --color-ink: var(--ink);
+    --color-ink-soft: var(--ink-soft);
+    --color-ink-faint: var(--ink-faint);
+    --color-paper: var(--paper);
+    --color-paper-deep: var(--paper-deep);
+    --color-plate: var(--plate);
+    --color-strata-1: var(--strata-1);
+    --color-strata-2: var(--strata-2);
+    --color-strata-3: var(--strata-3);
+    --color-strata-4: var(--strata-4);
+    --color-strata-5: var(--strata-5);
 
     --color-ring: var(--ring);
     --color-input: var(--input);
@@ -55,43 +58,60 @@
 }
 
 :root {
-    /* Polar-night instrument palette. Teal brand luminous on a deep-sea base,
-       amber reserved as a functional signal (route / pressure / alert). */
-    --brand: #06abba;          /* bright teal: decorative fills, icon strokes, glows */
-    --brand-strong: #3fdced;   /* luminous cyan: AA-safe accent TEXT on dark */
-    --brand-ink: #a9eef5;      /* palest ice: emphasis text */
-    --brand-surface: #0a2530;  /* dark teal tint: raised bands */
+    /* Floe palette. A glacial survey in daylight: cold paper and ink, with a
+       single vivid glacial cyan reserved for what the AI detects. Strata blues
+       carry measured data (thickness, depth, time). */
+    --paper: #f3f8fa;          /* page: cold glacial paper */
+    --paper-deep: #e7f0f4;     /* deeper wash for immersive bands */
+    --plate: #fdfeff;          /* survey plate / card surface */
+    --ink: #0b2430;            /* cold near-black ink */
+    --ink-soft: #44616d;       /* supporting text, AA on paper */
+    --ink-faint: #6c8894;      /* captions, metadata */
 
-    --signal: #f2a64b;         /* amber signal: route line, alert states */
-    --signal-strong: #f7bd6e;  /* brighter amber for emphasis */
+    --mask: #33c7f0;           /* detection mask: glacial cyan, the only loud color */
+    --mask-ink: #0b607c;       /* AA-safe mask-toned text on paper */
 
-    --abyss: #03141a;          /* deepest wash for immersive sections */
-    --panel: #072530;          /* elevated panel over the base */
+    --strata-1: #eaf3f7;       /* thin new ice */
+    --strata-2: #bfdce8;
+    --strata-3: #83b7cd;
+    --strata-4: #40809e;
+    --strata-5: #1b4a5e;       /* multiyear depth */
 
-    --background: #04171d;      /* polar night */
-    --foreground: #e9f6f8;      /* ice white */
-    --card: #072028;            /* panel surface */
-    --card-foreground: #e9f6f8;
-    --popover: #082a34;
-    --popover-foreground: #e9f6f8;
-    --primary: #14c0d1;         /* luminous teal fill for CTAs */
-    --primary-foreground: #032027; /* near-black ink on the bright fill */
-    --secondary: #0b2731;       /* dark teal panel */
-    --secondary-foreground: #a9eef5;
-    --muted: #0c2831;           /* cool dark surface */
-    --muted-foreground: #8bb2bc; /* ~7:1 on the polar-night base */
-    --accent: #0f2f3a;          /* teal hover */
-    --accent-foreground: #d6f4f8;
-    --destructive: #ff5a5f;
-    --border: #123540;          /* subtle teal border */
-    --input: #16404c;
-    --ring: #14c0d1;            /* teal focus ring */
-    --radius: 0.625rem;
+    --background: #f3f8fa;
+    --foreground: #0b2430;
+    --card: #fdfeff;
+    --card-foreground: #0b2430;
+    --popover: #fdfeff;
+    --popover-foreground: #0b2430;
+    --primary: #33c7f0;         /* mask cyan CTA fill */
+    --primary-foreground: #062733; /* deep sea ink on the mask fill */
+    --secondary: #e2edf1;
+    --secondary-foreground: #0b2430;
+    --muted: #e7f0f4;
+    --muted-foreground: #44616d;
+    --accent: #dcebf0;
+    --accent-foreground: #0b2430;
+    --destructive: #c0392b;
+    --border: #cbdde4;          /* survey hairline */
+    --input: #b4cdd6;
+    --ring: #40809e;
+    --radius: 0.5rem;
 }
 
-@utility hex-clip {
-  /* Pointy-top regular hexagon, matches the GlaciaNav mark */
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+/* Condensed uppercase display, the Floe headline voice */
+@utility display-condensed {
+  font-family: var(--font-heading);
+  font-stretch: 74%;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+}
+
+/* Cyan marker highlight behind a word: the mask, applied to language */
+@utility mask-highlight {
+  background: linear-gradient(to top, var(--mask) 0%, var(--mask) 88%, transparent 88%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-inline: 0.08em;
 }
 
 @layer base {
@@ -109,8 +129,8 @@
     @apply bg-background text-foreground;
   }
   ::selection {
-    background: color-mix(in srgb, var(--brand) 26%, transparent);
-    color: var(--brand-ink);
+    background: var(--mask);
+    color: var(--ink);
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;

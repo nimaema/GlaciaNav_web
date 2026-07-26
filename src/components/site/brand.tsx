@@ -1,67 +1,23 @@
-import { type CSSProperties, type ReactNode, useRef } from "react";
+import { type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Brand motif system, derived from the GlaciaNav marks:
- * - Hexagon = the favicon waypoint / ice-cell
- * - ChartGrid = nautical chart-plotter graticule
- * - Logo marks used as ambient watermarks
+ * Floe motif system: the visual grammar of a live ice survey.
+ * - SurveyGrid   = pale graticule ruled onto the paper
+ * - PlateFrame   = registration corner ticks that frame a "plate" (a figure)
+ * - MaskChip     = chartreuse detection swatch; color only where the AI found something
+ * - CoreColumn   = ice-core stratigraphy: thickness as vertical strata
+ * - DataLabel    = mono survey annotation
  */
 
-const HEX_POINTS = "50,1 99,29 99,86 50,114 1,86 1,29";
-
-export function Hexagon({
+/** Pale graticule ruled onto the paper. */
+export function SurveyGrid({
   className,
-  variant = "outline",
-  strokeWidth = 2,
-  style,
-}: {
-  className?: string;
-  variant?: "outline" | "filled";
-  strokeWidth?: number;
-  style?: CSSProperties;
-}) {
-  return (
-    <svg
-      viewBox="0 0 100 115"
-      fill="none"
-      className={className}
-      style={style}
-      aria-hidden="true"
-    >
-      <polygon
-        points={HEX_POINTS}
-        fill={variant === "filled" ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth={variant === "filled" ? 0 : strokeWidth}
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** Small hexagon node used as a section/eyebrow marker. */
-export function HexMarker({ className }: { className?: string }) {
-  return (
-    <span className={cn("relative inline-flex size-3.5 items-center justify-center", className)}>
-      <Hexagon variant="outline" strokeWidth={6} className="size-full text-brand" />
-      <span className="absolute size-1 rounded-full bg-brand" />
-    </span>
-  );
-}
-
-/** Nautical chart graticule: fine + coarse coordinate grid, optionally masked. */
-export function ChartGrid({
-  className,
-  tone = "ink",
   fade = "radial",
 }: {
   className?: string;
-  tone?: "ink" | "light";
   fade?: "radial" | "top" | "none";
 }) {
-  const stroke = tone === "light" ? "rgba(255,255,255,0.16)" : "rgba(2,108,122,0.10)";
-  const strokeBold = tone === "light" ? "rgba(255,255,255,0.22)" : "rgba(2,108,122,0.16)";
   const mask =
     fade === "radial"
       ? "radial-gradient(120% 100% at 50% 30%, #000 30%, transparent 78%)"
@@ -77,95 +33,114 @@ export function ChartGrid({
     >
       <svg className="absolute inset-0 size-full" width="100%" height="100%">
         <defs>
-          <pattern id={`fine-${tone}`} width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M28 0H0V28" fill="none" stroke={stroke} strokeWidth="1" />
+          <pattern id="floe-fine" width="32" height="32" patternUnits="userSpaceOnUse">
+            <path d="M32 0H0V32" fill="none" stroke="rgba(11,36,48,0.055)" strokeWidth="1" />
           </pattern>
-          <pattern id={`bold-${tone}`} width="140" height="140" patternUnits="userSpaceOnUse">
-            <path d="M140 0H0V140" fill="none" stroke={strokeBold} strokeWidth="1.25" />
+          <pattern id="floe-bold" width="160" height="160" patternUnits="userSpaceOnUse">
+            <path d="M160 0H0V160" fill="none" stroke="rgba(11,36,48,0.09)" strokeWidth="1" />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill={`url(#fine-${tone})`} />
-        <rect width="100%" height="100%" fill={`url(#bold-${tone})`} />
+        <rect width="100%" height="100%" fill="url(#floe-fine)" />
+        <rect width="100%" height="100%" fill="url(#floe-bold)" />
       </svg>
     </div>
   );
 }
 
-/** Icon inside a hexagon plate, using the brand mark silhouette. */
-export function HexIcon({
-  children,
+/** Registration corner ticks framing a figure, like crop marks on a survey plate. */
+export function PlateFrame({
   className,
-  tone = "surface",
+  tone = "ink",
 }: {
-  children: ReactNode;
   className?: string;
-  tone?: "surface" | "brand" | "glass";
+  tone?: "ink" | "mask";
 }) {
-  const plate =
-    tone === "brand"
-      ? "bg-brand text-white"
-      : tone === "glass"
-      ? "bg-white/10 text-brand"
-      : "bg-secondary text-brand-strong";
+  const color = tone === "mask" ? "border-mask" : "border-ink/35";
   return (
-    <span className={cn("relative inline-flex size-12 items-center justify-center", className)}>
-      <span className={cn("absolute inset-0 hex-clip", plate)} aria-hidden="true" />
-      <span className="relative inline-flex">{children}</span>
+    <span aria-hidden="true" className={cn("pointer-events-none absolute inset-0", className)}>
+      {[
+        "left-0 top-0 border-l-2 border-t-2",
+        "right-0 top-0 border-r-2 border-t-2",
+        "left-0 bottom-0 border-l-2 border-b-2",
+        "right-0 bottom-0 border-r-2 border-b-2",
+      ].map((pos) => (
+        <span key={pos} className={cn("absolute size-3.5", color, pos)} />
+      ))}
     </span>
   );
 }
 
-/** Card with a cursor-following teal spotlight. Updates CSS vars on a ref (no re-render). */
-export function SpotlightCard({
+/** Chartreuse detection swatch: a small filled square, the mask made tiny. */
+export function MaskChip({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn("inline-block size-2.5 shrink-0 bg-mask outline outline-1 outline-ink/25", className)}
+    />
+  );
+}
+
+/** Mono survey annotation. */
+export function DataLabel({
   children,
   className,
 }: {
   children: ReactNode;
   className?: string;
 }) {
-  const glowRef = useRef<HTMLSpanElement>(null);
-
-  function onMove(e: React.MouseEvent<HTMLDivElement>) {
-    const el = glowRef.current;
-    if (!el) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--my", `${e.clientY - r.top}px`);
-  }
-
   return (
-    <div onMouseMove={onMove} className={cn("group/spot relative overflow-hidden", className)}>
-      <span
-        ref={glowRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/spot:opacity-100"
-        style={{
-          background:
-            "radial-gradient(280px circle at var(--mx,50%) var(--my,0%), color-mix(in srgb, var(--brand) 22%, transparent), transparent 72%)",
-        }}
-      />
+    <span
+      className={cn(
+        "font-mono text-[0.66rem] uppercase tracking-[0.14em] text-ink-faint",
+        className
+      )}
+    >
       {children}
-    </div>
+    </span>
   );
 }
 
-/** Large faded brand mark used as an ambient watermark. */
-export function MarkWatermark({
-  src = "/logo-icon.svg",
+/** LinkedIn brand mark (lucide dropped brand icons). Fills with currentColor. */
+export function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" />
+    </svg>
+  );
+}
+
+export type Stratum = { t: number; tone: 1 | 2 | 3 | 4 | 5 };
+
+const STRATA_BG: Record<Stratum["tone"], string> = {
+  1: "bg-strata-1",
+  2: "bg-strata-2",
+  3: "bg-strata-3",
+  4: "bg-strata-4",
+  5: "bg-strata-5",
+};
+
+/**
+ * Ice-core stratigraphy: a vertical column of layers, thickness proportional
+ * to each stratum's `t`. The Floe signature for anything measured in depth.
+ */
+export function CoreColumn({
+  strata,
   className,
   style,
 }: {
-  src?: string;
+  strata: Stratum[];
   className?: string;
   style?: CSSProperties;
 }) {
   return (
-    <img
-      src={src}
-      alt=""
+    <div
       aria-hidden="true"
-      className={cn("pointer-events-none select-none", className)}
+      className={cn("flex flex-col overflow-hidden border border-ink/70", className)}
       style={style}
-    />
+    >
+      {strata.map((s, i) => (
+        <div key={i} className={cn("w-full", STRATA_BG[s.tone])} style={{ flexGrow: s.t }} />
+      ))}
+    </div>
   );
 }
