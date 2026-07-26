@@ -75,7 +75,7 @@ export function Nav() {
           className={cn("flex shrink-0 items-center gap-2.5", focusRing)}
           aria-label="GlaciaNav home"
         >
-          <img src="/logo-icon.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
+          <img src="/logo-icon-white-arrow.svg" alt="" aria-hidden="true" className="h-6 w-auto" />
           <span className="display-condensed text-lg font-extrabold text-ink">
             GlaciaNav
           </span>
