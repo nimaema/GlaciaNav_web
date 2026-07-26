@@ -25,9 +25,12 @@ const focusRing =
   "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const SWEEP_S = 3.2;
-const SWEEP_DELAY = 0.6;
-const SWEEP_REPEAT = 11;
+/** The pass is slow and deliberate: it is doing work, not wiping a screen. */
+const SWEEP_S = 5.4;
+const SWEEP_DELAY = 0.5;
+const SWEEP_REPEAT = 7;
+/** How far the analysed trail reaches back behind the leading edge. */
+const TRAIL = 0.4;
 
 /**
  * Floes the model publishes a full record for. All three sit in the right
@@ -87,10 +90,13 @@ function SegmentationOverlay({
   align,
   className,
   detail,
+  uid,
 }: {
   align: "xMin" | "xMid";
   className: string;
   detail: boolean;
+  /** Both overlays live in the DOM at once, so defs need distinct ids. */
+  uid: string;
 }) {
   const reduce = useReducedMotion();
   const { width, height } = HERO_IMAGE;
@@ -116,13 +122,36 @@ function SegmentationOverlay({
       preserveAspectRatio={`${align}YMid slice`}
     >
       <defs>
-        <linearGradient id="hero-swath" x1="0" x2="1" y1="0" y2="0">
+        <linearGradient id={`${uid}-trail`} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="var(--mask)" stopOpacity="0" />
-          <stop offset="82%" stopColor="var(--mask)" stopOpacity="0.30" />
-          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0.60" />
+          <stop offset="70%" stopColor="var(--mask)" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0.42" />
         </linearGradient>
+        <linearGradient id={`${uid}-ahead`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="var(--paper)" stopOpacity="0.34" />
+          <stop offset="100%" stopColor="var(--paper)" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id={`${uid}-shimmer`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="var(--mask)" stopOpacity="0" />
+          <stop offset="50%" stopColor="var(--mask)" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0" />
+        </linearGradient>
+        <pattern
+          id={`${uid}-lines`}
+          width="1"
+          height="14"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect width="1" height="7" fill="var(--mask-ink)" fillOpacity="0.22" />
+        </pattern>
+        {/* every classified floe, as one clip: lets light play inside the ice */}
+        <clipPath id={`${uid}-ice`}>
+          {ICE_SEGMENTS.map((s) => (
+            <path key={s.id} d={s.d} clipRule="evenodd" />
+          ))}
+        </clipPath>
         <marker
-          id="hero-drift-head"
+          id={`${uid}-drift-head`}
           viewBox="0 0 10 10"
           refX="8"
           refY="5"
@@ -134,21 +163,64 @@ function SegmentationOverlay({
         </marker>
       </defs>
 
-      {/* classified ice */}
+      {/* classified ice: the fill settles in behind its own contour */}
       {ICE_SEGMENTS.map((s) => (
         <motion.path
           key={s.id}
           d={s.d}
           fillRule="evenodd"
           fill="var(--mask)"
-          stroke="var(--mask-ink)"
-          strokeWidth={3}
-          strokeLinejoin="round"
-          initial={reduce ? { opacity: 0.34 } : { opacity: 0 }}
-          animate={{ opacity: 0.34 }}
-          transition={{ delay: reachedAt(s.cx, reduce), duration: 0.45 }}
+          stroke="none"
+          initial={reduce ? { opacity: 0.32 } : { opacity: 0 }}
+          animate={reduce ? { opacity: 0.32 } : { opacity: [0, 0.55, 0.32] }}
+          transition={{
+            delay: reachedAt(s.cx, reduce) + 0.28,
+            duration: 1.1,
+            times: [0, 0.3, 1],
+            ease: "easeOut",
+          }}
         />
       ))}
+
+      {/* the model drawing each outline as the swath reaches it */}
+      {ICE_SEGMENTS.map((s) => (
+        <motion.path
+          key={`o-${s.id}`}
+          d={s.d}
+          fill="none"
+          stroke="var(--mask-ink)"
+          strokeWidth={3.5}
+          strokeLinejoin="round"
+          initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{
+            pathLength: { delay: reachedAt(s.cx, reduce), duration: 0.7, ease: "easeInOut" },
+            opacity: { delay: reachedAt(s.cx, reduce), duration: 0.2 },
+          }}
+        />
+      ))}
+
+      {/* light moving through the ice, so the masks read as live, not painted */}
+      {!reduce ? (
+        <g clipPath={`url(#${uid}-ice)`}>
+          <motion.rect
+            y={-height}
+            width={width * 0.38}
+            height={height * 3}
+            fill={`url(#${uid}-shimmer)`}
+            transform="rotate(14)"
+            initial={{ x: -width * 0.5 }}
+            animate={{ x: [-width * 0.5, width * 1.15] }}
+            transition={{
+              duration: 7,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatDelay: 2.5,
+              delay: SWEEP_DELAY + SWEEP_S * 0.5,
+              ease: "easeInOut",
+            }}
+          />
+        </g>
+      ) : null}
 
       {/* forecast drift, flowing with the current */}
       {detail
@@ -166,7 +238,7 @@ function SegmentationOverlay({
                   strokeOpacity={0.6}
                   strokeWidth={3.5}
                   strokeDasharray="14 10"
-                  markerEnd="url(#hero-drift-head)"
+                  markerEnd={`url(#${uid}-drift-head)`}
                   initial={reduce ? false : { pathLength: 0, opacity: 0 }}
                   animate={
                     reduce
@@ -234,28 +306,42 @@ function SegmentationOverlay({
           })
         : null}
 
-      {/* the swath, with a bright leading edge */}
+      {/* The pass. Local origin is the leading edge: analysed trail behind it,
+          a soft unprocessed veil just ahead, so looping never pops. */}
       {!reduce ? (
         <motion.g
-          initial={{ x: -width * 0.34 }}
-          animate={{ x: [-width * 0.34, width] }}
+          initial={{ x: 0 }}
+          animate={{ x: [0, width] }}
           transition={{
             duration: SWEEP_S,
             delay: SWEEP_DELAY,
             repeat: Number.POSITIVE_INFINITY,
             repeatDelay: SWEEP_REPEAT,
-            ease: "linear",
+            ease: [0.4, 0, 0.35, 1],
           }}
         >
-          <rect y="0" width={width * 0.32} height={height} fill="url(#hero-swath)" />
+          {/* what the sensor has not reached yet */}
+          <rect x={0} y={0} width={width * 0.22} height={height} fill={`url(#${uid}-ahead)`} />
+          {/* what it has just analysed */}
           <rect
-            x={width * 0.32 - 3}
-            y="0"
-            width={5}
+            x={-width * TRAIL}
+            y={0}
+            width={width * TRAIL}
             height={height}
-            fill="var(--mask-ink)"
-            fillOpacity={0.8}
+            fill={`url(#${uid}-trail)`}
           />
+          {/* sampling lines inside the active band */}
+          <rect
+            x={-width * 0.11}
+            y={0}
+            width={width * 0.11}
+            height={height}
+            fill={`url(#${uid}-lines)`}
+            opacity={0.55}
+          />
+          {/* the leading edge itself */}
+          <rect x={-14} y={0} width={14} height={height} fill="var(--mask)" fillOpacity={0.5} />
+          <rect x={-3} y={0} width={4} height={height} fill="var(--mask-ink)" fillOpacity={0.9} />
         </motion.g>
       ) : null}
 
@@ -266,12 +352,13 @@ function SegmentationOverlay({
             const b = boxes.get(s.id);
             if (!b) return null;
             const w = 250;
-            const h = 84;
+            const h = 122;
             const x = Math.max(8, Math.min(width - w - 8, s.cx - w / 2));
             // Only the very top of the frame publishes downward; everything
             // else reads upward, which keeps the right column evenly stacked.
             const below = b.y < 300;
-            const y = below ? b.y + b.h + 36 : b.y - 36 - h;
+            // Reserve the top band for the page's own chrome, whatever the crop.
+            const y = Math.max(height * 0.19, below ? b.y + b.h + 36 : b.y - 36 - h);
             const at = reachedAt(s.cx, reduce);
             return (
               <motion.g
@@ -301,45 +388,55 @@ function SegmentationOverlay({
                   strokeOpacity={0.7}
                 />
                 <rect x={x} y={y} width={6} height={h} fill="var(--mask)" />
+                {/* identity row */}
                 <text
                   x={x + 20}
-                  y={y + 32}
+                  y={y + 31}
                   fontFamily="var(--font-mono)"
-                  fontSize={25}
+                  fontSize={23}
                   fill="var(--ink-soft)"
                 >
                   {r.code}
                 </text>
                 <text
                   x={x + w - 20}
-                  y={y + 32}
+                  y={y + 31}
                   textAnchor="end"
                   fontFamily="var(--font-mono)"
-                  fontSize={25}
+                  fontSize={23}
                   fill="var(--mask-ink)"
                 >
                   {r.conf}
                 </text>
+                <line
+                  x1={x + 20}
+                  y1={y + 46}
+                  x2={x + w - 20}
+                  y2={y + 46}
+                  stroke="var(--ink)"
+                  strokeOpacity={0.18}
+                  strokeWidth={2}
+                />
+                {/* measurement, caption over value so nothing shares a line */}
                 <text
                   x={x + 20}
-                  y={y + 66}
-                  fontFamily="var(--font-heading)"
-                  fontWeight="800"
-                  fontSize={32}
-                  fill="var(--ink)"
-                >
-                  {r.thickness}
-                </text>
-                <text
-                  x={x + w - 20}
-                  y={y + 66}
-                  textAnchor="end"
+                  y={y + 72}
                   fontFamily="var(--font-mono)"
-                  fontSize={19}
-                  letterSpacing="1.5"
+                  fontSize={18}
+                  letterSpacing="2"
                   fill="var(--ink-faint)"
                 >
                   THICKNESS
+                </text>
+                <text
+                  x={x + 20}
+                  y={y + 104}
+                  fontFamily="var(--font-heading)"
+                  fontWeight="800"
+                  fontSize={34}
+                  fill="var(--ink)"
+                >
+                  {r.thickness}
                 </text>
               </motion.g>
             );
@@ -474,8 +571,8 @@ export function Hero() {
         transition={{ duration: reduce ? 0 : 2, ease: EASE }}
       />
 
-      <SegmentationOverlay align="xMin" className="lg:hidden" detail={false} />
-      <SegmentationOverlay align="xMid" className="hidden lg:block" detail />
+      <SegmentationOverlay align="xMin" className="lg:hidden" detail={false} uid="hs-sm" />
+      <SegmentationOverlay align="xMid" className="hidden lg:block" detail uid="hs-lg" />
 
       {/* cold-light grade + legibility */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--paper)_80%,transparent),color-mix(in_srgb,var(--paper)_8%,transparent)_36%,color-mix(in_srgb,var(--paper)_16%,transparent)_58%,color-mix(in_srgb,var(--paper)_90%,transparent))]" />
