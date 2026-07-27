@@ -106,12 +106,18 @@
   letter-spacing: 0.005em;
 }
 
-/* Cyan marker highlight behind a word: the mask, applied to language */
+/* Cyan marker highlight behind a word: the mask, applied to language.
+   Painted in em units so the block hugs the capitals at any size, and sized
+   by background rather than padding so the word's layout box never shifts. */
 @utility mask-highlight {
-  background: linear-gradient(to top, var(--mask) 0%, var(--mask) 88%, transparent 88%);
+  background-image: linear-gradient(var(--mask), var(--mask));
+  background-repeat: no-repeat;
+  background-size: 100% 0.78em;
+  background-position: 0 0.055em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  padding-inline: 0.08em;
+  padding-inline: 0.07em;
+  margin-inline: -0.07em;
 }
 
 @layer base {

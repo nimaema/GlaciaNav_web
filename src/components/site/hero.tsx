@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { hero } from "@/content";
@@ -25,12 +25,33 @@ const focusRing =
   "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-/** The pass is slow and deliberate: it is doing work, not wiping a screen. */
-const SWEEP_S = 5.4;
+/** The pass is slow and quiet: it is doing work, not wiping a screen. */
+const SWEEP_S = 6.8;
 const SWEEP_DELAY = 0.5;
-const SWEEP_REPEAT = 7;
+const SWEEP_REPEAT = 9;
 /** How far the analysed trail reaches back behind the leading edge. */
-const TRAIL = 0.4;
+const TRAIL = 0.46;
+
+/**
+ * Thickness for every classified floe, ordered by how consolidated it is:
+ * the big welded pans are the old ice, the small brash is thin. Surfaced on
+ * hover; three of them are also published as full records.
+ */
+const FLOE_THICKNESS: Record<string, string> = {
+  "9": "1.5 m",
+  D: "1.4 m",
+  A: "1.2 m",
+  "6": "0.9 m",
+  "1": "0.8 m",
+  "4": "0.7 m",
+  "7": "0.5 m",
+  "5": "0.4 m",
+  "3": "0.4 m",
+  C: "0.4 m",
+  "2": "0.3 m",
+  "8": "1.6 m",
+  B: "0.3 m",
+};
 
 /**
  * Floes the model publishes a full record for. All three sit in the right
@@ -91,12 +112,16 @@ function SegmentationOverlay({
   className,
   detail,
   uid,
+  hovered,
+  onHover,
 }: {
   align: "xMin" | "xMid";
   className: string;
   detail: boolean;
   /** Both overlays live in the DOM at once, so defs need distinct ids. */
   uid: string;
+  hovered: string | null;
+  onHover: (id: string | null) => void;
 }) {
   const reduce = useReducedMotion();
   const { width, height } = HERO_IMAGE;
@@ -124,26 +149,23 @@ function SegmentationOverlay({
       <defs>
         <linearGradient id={`${uid}-trail`} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="var(--mask)" stopOpacity="0" />
-          <stop offset="70%" stopColor="var(--mask)" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0.42" />
+          <stop offset="72%" stopColor="var(--mask)" stopOpacity="0.07" />
+          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0.18" />
         </linearGradient>
         <linearGradient id={`${uid}-ahead`} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="var(--paper)" stopOpacity="0.34" />
+          <stop offset="0%" stopColor="var(--paper)" stopOpacity="0.16" />
           <stop offset="100%" stopColor="var(--paper)" stopOpacity="0" />
         </linearGradient>
         <linearGradient id={`${uid}-shimmer`} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0%" stopColor="var(--mask)" stopOpacity="0" />
-          <stop offset="50%" stopColor="var(--mask)" stopOpacity="0.5" />
+          <stop offset="50%" stopColor="var(--mask)" stopOpacity="0.42" />
           <stop offset="100%" stopColor="var(--mask)" stopOpacity="0" />
         </linearGradient>
-        <pattern
-          id={`${uid}-lines`}
-          width="1"
-          height="14"
-          patternUnits="userSpaceOnUse"
-        >
-          <rect width="1" height="7" fill="var(--mask-ink)" fillOpacity="0.22" />
-        </pattern>
+        {/* the edge itself: a hairline with the light falling away from it */}
+        <linearGradient id={`${uid}-edge`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="var(--mask)" stopOpacity="0" />
+          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0.34" />
+        </linearGradient>
         {/* every classified floe, as one clip: lets light play inside the ice */}
         <clipPath id={`${uid}-ice`}>
           {ICE_SEGMENTS.map((s) => (
@@ -199,6 +221,29 @@ function SegmentationOverlay({
           }}
         />
       ))}
+
+      {/* Hit targets: hovering a floe brings its own mask up and names it.
+          Invisible until pointed at, but always hit-testable by its fill. */}
+      {detail
+        ? ICE_SEGMENTS.map((s) => (
+            <motion.path
+              key={`h-${s.id}`}
+              d={s.d}
+              fillRule="evenodd"
+              fill="var(--mask)"
+              stroke="var(--mask-ink)"
+              strokeWidth={5}
+              strokeLinejoin="round"
+              className="pointer-events-auto"
+              style={{ cursor: "crosshair" }}
+              onPointerEnter={() => onHover(s.id)}
+              onPointerLeave={() => onHover(null)}
+              initial={false}
+              animate={{ opacity: hovered === s.id ? 0.42 : 0 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            />
+          ))
+        : null}
 
       {/* light moving through the ice, so the masks read as live, not painted */}
       {!reduce ? (
@@ -321,7 +366,7 @@ function SegmentationOverlay({
           }}
         >
           {/* what the sensor has not reached yet */}
-          <rect x={0} y={0} width={width * 0.22} height={height} fill={`url(#${uid}-ahead)`} />
+          <rect x={0} y={0} width={width * 0.2} height={height} fill={`url(#${uid}-ahead)`} />
           {/* what it has just analysed */}
           <rect
             x={-width * TRAIL}
@@ -330,18 +375,9 @@ function SegmentationOverlay({
             height={height}
             fill={`url(#${uid}-trail)`}
           />
-          {/* sampling lines inside the active band */}
-          <rect
-            x={-width * 0.11}
-            y={0}
-            width={width * 0.11}
-            height={height}
-            fill={`url(#${uid}-lines)`}
-            opacity={0.55}
-          />
-          {/* the leading edge itself */}
-          <rect x={-14} y={0} width={14} height={height} fill="var(--mask)" fillOpacity={0.5} />
-          <rect x={-3} y={0} width={4} height={height} fill="var(--mask-ink)" fillOpacity={0.9} />
+          {/* light gathering into the edge, then the hairline */}
+          <rect x={-90} y={0} width={90} height={height} fill={`url(#${uid}-edge)`} />
+          <rect x={-1.5} y={0} width={2.5} height={height} fill="var(--mask-ink)" fillOpacity={0.5} />
         </motion.g>
       ) : null}
 
@@ -442,6 +478,53 @@ function SegmentationOverlay({
             );
           })
         : null}
+
+    </svg>
+  );
+}
+
+/**
+ * The pointed-at floe, named. Lives in its own layer above the type, sharing
+ * the overlay's viewBox and fit so it lands on the floe it describes.
+ */
+function HoverChip({ hovered }: { hovered: string | null }) {
+  const reduce = useReducedMotion();
+  const { width, height } = HERO_IMAGE;
+  const s = ICE_SEGMENTS.find((seg) => seg.id === hovered);
+  if (!s) return null;
+
+  const b = bboxOf(s.d);
+  const label = `Floe ${s.id} · ${FLOE_THICKNESS[s.id] ?? "classified"}`;
+  const w = label.length * 15 + 36;
+  const cx = Math.max(w / 2 + 10, Math.min(width - w / 2 - 10, s.cx));
+  const cy = Math.max(height * 0.2, b.y - 26);
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-20 hidden size-full lg:block"
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <motion.g
+        initial={reduce ? false : { opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18 }}
+      >
+        <rect x={cx - w / 2} y={cy - 44} width={w} height={46} fill="var(--ink)" />
+        <rect x={cx - w / 2} y={cy - 44} width={5} height={46} fill="var(--mask)" />
+        <text
+          x={cx + 6}
+          y={cy - 14}
+          textAnchor="middle"
+          fontFamily="var(--font-mono)"
+          fontSize={24}
+          letterSpacing="1"
+          fill="var(--paper)"
+        >
+          {label}
+        </text>
+      </motion.g>
     </svg>
   );
 }
@@ -557,6 +640,7 @@ const READOUTS = [
 
 export function Hero() {
   const reduce = useReducedMotion();
+  const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <section id="hero" className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden bg-paper">
@@ -571,17 +655,33 @@ export function Hero() {
         transition={{ duration: reduce ? 0 : 2, ease: EASE }}
       />
 
-      <SegmentationOverlay align="xMin" className="lg:hidden" detail={false} uid="hs-sm" />
-      <SegmentationOverlay align="xMid" className="hidden lg:block" detail uid="hs-lg" />
+      <SegmentationOverlay
+        align="xMin"
+        className="lg:hidden"
+        detail={false}
+        uid="hs-sm"
+        hovered={null}
+        onHover={() => {}}
+      />
+      <SegmentationOverlay
+        align="xMid"
+        className="hidden lg:block"
+        detail
+        uid="hs-lg"
+        hovered={hovered}
+        onHover={setHovered}
+      />
 
       {/* cold-light grade + legibility */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--paper)_80%,transparent),color-mix(in_srgb,var(--paper)_8%,transparent)_36%,color-mix(in_srgb,var(--paper)_16%,transparent)_58%,color-mix(in_srgb,var(--paper)_90%,transparent))]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_srgb,var(--paper)_58%,transparent),transparent_45%)]" />
 
       <InstrumentOverlay />
+      <HoverChip hovered={hovered} />
 
-      {/* Composition */}
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 pb-8 pt-24 md:px-8">
+      {/* Composition. The shell lets the pointer through to the floes beneath;
+          only the things you can actually use take events back. */}
+      <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 pb-8 pt-24 md:px-8">
         <motion.div
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -616,14 +716,14 @@ export function Hero() {
             >
               <a
                 href="#contact"
-                className={`group inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-105 active:scale-[0.98] ${focusRing}`}
+                className={`group pointer-events-auto inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-105 active:scale-[0.98] ${focusRing}`}
               >
                 {hero.primaryCta}
                 <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </a>
               <a
                 href="#solution"
-                className={`inline-flex h-11 items-center justify-center rounded-sm border border-ink/40 bg-paper/60 px-6 text-sm font-medium text-ink backdrop-blur-sm transition-colors hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98] ${focusRing}`}
+                className={`pointer-events-auto inline-flex h-11 items-center justify-center rounded-sm border border-ink/40 bg-paper/60 px-6 text-sm font-medium text-ink backdrop-blur-sm transition-colors hover:border-ink hover:bg-ink hover:text-paper active:scale-[0.98] ${focusRing}`}
               >
                 {hero.secondaryCta}
               </a>
