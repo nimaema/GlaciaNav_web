@@ -62,7 +62,7 @@ export function ChartComparison({ className }: { className?: string }) {
       >
         {/* Live survey: the ice where it actually is, measured */}
         <BothniaBase overlay={<Callouts items={MEASUREMENTS} />}>
-          <IceMaskLayer mode="live" dx={3.5} dy={5.5} />
+          <IceMaskLayer mode="live" drift={1} />
         </BothniaBase>
 
         {/* Yesterday's chart, clipped to the left of the divider */}

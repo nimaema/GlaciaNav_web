@@ -5,11 +5,11 @@ import { DataLabel, PlateFrame } from "./brand";
 import {
   BothniaBase,
   DriftLayer,
-  HeatLegend,
   IceMaskLayer,
   SweepLayer,
   ThicknessLayer,
 } from "./bothnia-map";
+import { ICE_FIELD, THICKNESS_CLASSES } from "./ice-field";
 
 /**
  * The instrument: one chart of the Bothnian Bay, three data layers, switched
@@ -19,34 +19,73 @@ import {
 
 export type InstrumentStage = { title: string; body: string };
 
+/** Reads the classes straight off the field, so chart and key cannot drift. */
+function ThicknessKey() {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {THICKNESS_CLASSES.map((c) => (
+        <div key={c.label} className="flex items-center gap-2.5">
+          <span
+            className="size-3 shrink-0 outline outline-1 outline-ink/25"
+            style={{ background: c.tone }}
+          />
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.1em] text-ink-soft">
+            {c.label}
+          </span>
+          <span className="ml-auto font-mono text-[0.6rem] tabular-nums text-ink-faint">
+            {c.short} m
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SwatchKey({ items }: { items: Array<{ label: string; swatch: string }> }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {items.map((i) => (
+        <div key={i.label} className="flex items-center gap-2.5">
+          <span
+            className="size-3 shrink-0 outline outline-1 outline-ink/25"
+            style={{ background: i.swatch }}
+          />
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.1em] text-ink-soft">
+            {i.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const LAYER_META = [
   {
-    chip: "Layer · classification",
+    chip: "Layer · ice concentration",
+    stat: `${ICE_FIELD.length} floes`,
     legend: (
-      <HeatLegend
-        from="Open water"
-        to="Sea ice"
-        gradient="linear-gradient(to right, var(--plate), var(--mask))"
+      <SwatchKey
+        items={[
+          { label: "Detected sea ice", swatch: "color-mix(in srgb, var(--mask) 50%, var(--plate))" },
+          { label: "Open water", swatch: "var(--plate)" },
+        ]}
       />
     ),
   },
   {
-    chip: "Layer · thickness",
-    legend: (
-      <HeatLegend
-        from="0.2 m"
-        to="2.0 m+"
-        gradient="linear-gradient(to right, var(--strata-2), var(--strata-3), var(--strata-4), var(--strata-5))"
-      />
-    ),
+    chip: "Layer · ice thickness",
+    stat: "5 classes",
+    legend: <ThicknessKey />,
   },
   {
     chip: "Layer · drift +6 h",
+    stat: "vector field",
     legend: (
-      <HeatLegend
-        from="Most likely"
-        to="Uncertain"
-        gradient="linear-gradient(to right, var(--mask), color-mix(in srgb, var(--mask) 15%, var(--plate)))"
+      <SwatchKey
+        items={[
+          { label: "Observed now", swatch: "var(--strata-2)" },
+          { label: "Forecast +6 h", swatch: "color-mix(in srgb, var(--mask) 34%, var(--plate))" },
+        ]}
       />
     ),
   },
@@ -101,8 +140,9 @@ export function InstrumentPanel({ stages }: { stages: InstrumentStage[] }) {
                   <DriftLayer />
                 )}
               </BothniaBase>
-              <span className="absolute left-3 top-3 border border-ink/40 bg-plate/95 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-ink-soft">
+              <span className="absolute left-3 top-3 flex items-center gap-2 border border-ink/40 bg-plate/95 px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-[0.1em] text-ink-soft">
                 {LAYER_META[mode].chip}
+                <span className="text-mask-ink">{LAYER_META[mode].stat}</span>
               </span>
             </motion.div>
           </AnimatePresence>

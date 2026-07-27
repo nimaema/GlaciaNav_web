@@ -1,5 +1,6 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { ICE_FIELD, fieldPath, sample, thicknessPaths } from "./ice-field";
 
 /**
  * The Bothnian Bay, drawn as a working nautical chart: Swedish coast to the
@@ -14,27 +15,27 @@ import { motion, useReducedMotion } from "framer-motion";
  */
 
 const LAND =
-  "M 100,120 L 100,0 L 0,0 L 0,120 L 20,120 " +
-  // Swedish coast, south to north: long gentle curves, occasional headland
-  "C 24,111 20,102 25,95 C 29,89 24,81 27,75 C 30,69 26,61 30,55 " +
-  "C 34,50 28,42 32,36 C 35,31 30,25 34,20 " +
-  // the north coast around Kemi and Tornio
-  "C 40,14 45,20 51,14 C 56,9 62,17 69,12 " +
-  // Finnish coast, north to south: the bay widening past Oulu
-  "C 74,16 71,24 75,30 C 79,36 73,44 77,50 C 81,56 75,64 79,70 " +
-  "C 83,76 77,84 81,90 C 85,96 79,104 83,110 C 85,114 82,117 84,120 Z";
+  "M 100,120 L 100,0 L 0,0 L 0,120 L 12,120 " +
+  // Swedish coast, south to north: river estuaries cutting a long shore
+  "C 16,112 12,104 15,97 C 19,91 14,84 17,77 C 20,71 15,64 18,57 " +
+  "C 22,51 16,44 20,38 C 23,32 19,27 22,22 C 23,19 25,17 27,16 " +
+  // the head of the bay at Tornio and Kemi, shallow and braided
+  "C 32,13 36,18 41,15 C 45,13 48,17 53,14 C 57,12 61,16 66,13 C 69,12 71,14 73,16 " +
+  // Finnish coast, north to south: Hailuoto's shoulder, then a steadier run
+  "C 77,21 74,26 77,31 C 81,36 75,42 79,48 C 83,54 77,60 81,66 " +
+  "C 85,72 79,79 83,85 C 87,91 81,98 85,104 C 88,110 85,115 88,120 Z";
 
 const ISLANDS: Array<[number, number, number]> = [
-  [33, 33, 1.0], [36, 30, 0.7], [34, 37, 0.6],   // Luleå archipelago
-  [60, 19, 0.7], [55, 21, 0.5],                   // off Kemi
-  [70, 58, 1.5], [67, 62, 0.7],                   // Hailuoto, off Oulu
-  [30, 64, 0.6], [32, 70, 0.5],                   // Swedish skerries
+  [24, 33, 1.1], [28, 29, 0.8], [26, 38, 0.7],   // Luleå archipelago
+  [59, 20, 0.8], [53, 22, 0.6],                   // off Kemi
+  [74, 57, 1.7], [70, 62, 0.8],                   // Hailuoto, off Oulu
+  [21, 66, 0.7], [24, 73, 0.6],                   // Swedish skerries
 ];
 
 const PORTS: Array<{ x: number; y: number; name: string; side: "left" | "right" | "top" }> = [
-  { x: 29, y: 36, name: "Luleå", side: "right" },
-  { x: 56, y: 16, name: "Kemi", side: "top" },
-  { x: 76, y: 53, name: "Oulu", side: "left" },
+  { x: 19, y: 37, name: "Luleå", side: "right" },
+  { x: 55, y: 15, name: "Kemi", side: "top" },
+  { x: 80, y: 53, name: "Oulu", side: "left" },
 ];
 
 export function BothniaBase({
@@ -55,8 +56,8 @@ export function BothniaBase({
       className={className ?? "absolute inset-0 size-full"}
       aria-hidden="true"
     >
-      {/* chart water */}
-      <rect width="100" height="120" fill="var(--plate)" />
+      {/* chart water: white, so land reads as land and ice as ice */}
+      <rect width="100" height="120" fill="#ffffff" />
 
       {/* graticule */}
       {[20, 40, 60, 80].map((x) => (
@@ -70,9 +71,9 @@ export function BothniaBase({
       {children}
 
       {/* land */}
-      <path d={LAND} fill="#dde7ec" stroke="rgba(11,36,48,0.6)" strokeWidth="0.4" strokeLinejoin="round" />
+      <path d={LAND} fill="#aec4d0" stroke="rgba(11,36,48,0.8)" strokeWidth="0.55" strokeLinejoin="round" />
       {ISLANDS.map(([x, y, r], i) => (
-        <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.7} fill="#dde7ec" stroke="rgba(11,36,48,0.55)" strokeWidth="0.28" />
+        <ellipse key={i} cx={x} cy={y} rx={r} ry={r * 0.7} fill="#aec4d0" stroke="rgba(11,36,48,0.55)" strokeWidth="0.28" />
       ))}
 
       {/* ports */}
@@ -94,16 +95,16 @@ export function BothniaBase({
 
       {labels ? (
         <>
-          <text x={4} y={56} fontFamily="var(--font-mono)" fontSize="2.6" letterSpacing="0.5" fill="#6c8894">
+          <text x={3} y={58} fontFamily="var(--font-mono)" fontSize="2.6" letterSpacing="0.5" fill="#5b7683">
             SWEDEN
           </text>
-          <text x={97} y={34} textAnchor="end" fontFamily="var(--font-mono)" fontSize="2.6" letterSpacing="0.5" fill="#6c8894">
+          <text x={97} y={30} textAnchor="end" fontFamily="var(--font-mono)" fontSize="2.6" letterSpacing="0.5" fill="#5b7683">
             FINLAND
           </text>
-          <text x={51} y={78} textAnchor="middle" fontFamily="var(--font-mono)" fontSize="2.9" letterSpacing="0.7" fill="#8aa5b0">
+          <text x={50} y={92} textAnchor="middle" fontFamily="var(--font-mono)" fontSize="2.9" letterSpacing="0.7" fill="#7d99a5">
             BOTHNIAN BAY
           </text>
-          <text x={2} y={42.8} fontFamily="var(--font-mono)" fontSize="2.1" fill="#8aa5b0">
+          <text x={1.5} y={42.8} fontFamily="var(--font-mono)" fontSize="2.1" fill="#8aa5b0">
             65°N
           </text>
           <text x={56} y={118} fontFamily="var(--font-mono)" fontSize="2.1" fill="#8aa5b0">
@@ -166,186 +167,137 @@ export function Callouts({
 
 /* ------------------------------ Ice extents ----------------------------- */
 
-/** Ice geometry as smooth closed paths: landfast belts plus the central pack. */
-export const ICE_SHAPES = [
-  // landfast belt along the north coast
-  "M 34,21 Q 39,16 45,18 Q 50,13 56,16 Q 62,11 68,14 Q 72,16 71,21 Q 66,25 60,23 Q 54,27 48,25 Q 42,28 37,26 Q 33,25 34,21 Z",
-  // belt along the Finnish coast
-  "M 73,29 Q 77,34 74,39 Q 78,45 75,50 Q 79,56 76,61 Q 72,58 74,52 Q 70,47 73,42 Q 69,36 73,29 Z",
-  // the central drift pack
-  "M 40,41 Q 45,36 51,39 Q 57,35 61,40 Q 64,45 60,49 Q 62,54 56,56 Q 50,60 44,56 Q 38,53 41,48 Q 37,45 40,41 Z",
-];
-
-/** Shift every "x,y" coordinate pair in a path or points string. */
-function shiftPoints(shape: string, dx: number, dy: number) {
-  return shape
-    .split(" ")
-    .map((token) => {
-      if (!/^-?[\d.]+,-?[\d.]+$/.test(token)) return token;
-      const [x, y] = token.split(",").map(Number);
-      return `${(x + dx).toFixed(1)},${(y + dy).toFixed(1)}`;
-    })
-    .join(" ");
-}
-
 /**
- * The classified ice, as the chart shows it. `mode="stale"` draws yesterday's
- * charted extent (pale, dashed); `mode="live"` draws the detected extent,
- * masked in glacial cyan, optionally drifted by (dx, dy).
+ * The classified ice. `mode="stale"` is the charted extent from the last
+ * issue: every floe drawn where it was, pale and outlined. `mode="live"` is
+ * the detected extent now, masked in glacial cyan. `drift` advances the whole
+ * field along each floe's own vector, which is how the two come apart.
  */
 export function IceMaskLayer({
   mode,
-  dx = 0,
-  dy = 0,
+  drift = 0,
   animate = false,
 }: {
   mode: "stale" | "live";
-  dx?: number;
-  dy?: number;
+  drift?: number;
   animate?: boolean;
 }) {
   const reduce = useReducedMotion();
   const live = mode === "live";
+  const d = useMemo(() => fieldPath(ICE_FIELD, drift), [drift]);
   return (
-    <g>
-      {ICE_SHAPES.map((d, i) => (
-        <motion.path
-          key={i}
-          d={shiftPoints(d, dx, dy)}
-          fill={live ? "var(--mask)" : "var(--strata-1)"}
-          fillOpacity={live ? 0.55 : 0.9}
-          stroke={live ? "var(--mask-ink)" : "rgba(11,36,48,0.45)"}
-          strokeWidth={live ? 0.45 : 0.35}
-          strokeDasharray={live ? undefined : "1.4 1.1"}
-          strokeLinejoin="round"
-          initial={animate && !reduce ? { opacity: 0 } : false}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 + i * 0.3, duration: 0.5 }}
-        />
-      ))}
-    </g>
+    <motion.path
+      d={d}
+      fillRule="nonzero"
+      fill={live ? "var(--mask)" : "var(--strata-1)"}
+      fillOpacity={live ? 0.5 : 0.85}
+      stroke={live ? "var(--mask-ink)" : "rgba(11,36,48,0.4)"}
+      strokeWidth={live ? 0.16 : 0.13}
+      strokeLinejoin="round"
+      initial={animate && !reduce ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.35, duration: 0.6 }}
+    />
   );
 }
 
 /* ---------------------------- Thickness heat ---------------------------- */
 
-const HEAT_CELLS: Array<{ cx: number; cy: number; rx: number; ry: number; deep: boolean }> = [
-  { cx: 52, cy: 25, rx: 24, ry: 14, deep: true },
-  { cx: 38, cy: 40, rx: 14, ry: 11, deep: false },
-  { cx: 66, cy: 38, rx: 13, ry: 11, deep: false },
-  { cx: 48, cy: 54, rx: 15, ry: 11, deep: false },
-  { cx: 60, cy: 20, rx: 11, ry: 8, deep: true },
-];
-
-/** Ice thickness as a continuous heat field: pale cyan thin → deep navy thick. */
+/**
+ * Ice thickness, classified per floe the way an ice chart bins it: every floe
+ * carries its own measurement and is drawn in its class colour. Five paths
+ * render the whole choropleth.
+ */
 export function ThicknessLayer() {
   const reduce = useReducedMotion();
+  const bins = useMemo(() => thicknessPaths(), []);
   return (
     <g>
-      <defs>
-        <radialGradient id="th-deep">
-          <stop offset="0%" stopColor="var(--strata-5)" stopOpacity="0.9" />
-          <stop offset="55%" stopColor="var(--strata-4)" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="var(--strata-2)" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="th-mid">
-          <stop offset="0%" stopColor="var(--strata-4)" stopOpacity="0.7" />
-          <stop offset="60%" stopColor="var(--strata-3)" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="var(--strata-2)" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {/* thin-ice base wash across the whole bay */}
-      <motion.rect
-        x="0" y="0" width="100" height="120"
-        fill="var(--strata-2)" opacity="0.35"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 0.35 }}
-        transition={{ duration: 0.6 }}
-      />
-      {HEAT_CELLS.map((c, i) => (
-        <motion.ellipse
-          key={i}
-          cx={c.cx}
-          cy={c.cy}
-          rx={c.rx}
-          ry={c.ry}
-          fill={`url(#${c.deep ? "th-deep" : "th-mid"})`}
-          initial={reduce ? false : { opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 + i * 0.12, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformOrigin: `${c.cx}px ${c.cy}px` }}
-        />
-      ))}
+      {bins.map((b, i) =>
+        b.d ? (
+          <motion.path
+            key={b.label}
+            d={b.d}
+            fillRule="nonzero"
+            fill={b.tone}
+            stroke="rgba(11,36,48,0.28)"
+            strokeWidth={0.13}
+            strokeLinejoin="round"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 0.94 }}
+            transition={{ delay: 0.1 + i * 0.09, duration: 0.5 }}
+          />
+        ) : null
+      )}
     </g>
   );
 }
 
 /* -------------------------- Drift probability --------------------------- */
 
-const DRIFT_BLOBS: Array<{ cx: number; cy: number; rx: number; ry: number; o: number }> = [
-  { cx: 49, cy: 52, rx: 11, ry: 8, o: 0.75 },
-  { cx: 46, cy: 64, rx: 13, ry: 10, o: 0.5 },
-  { cx: 43, cy: 78, rx: 15, ry: 12, o: 0.3 },
-  { cx: 40, cy: 92, rx: 16, ry: 13, o: 0.15 },
-];
-
-const DRIFT_ARROWS = [
-  "M 50,46 C 48,56 46,64 43,74",
-  "M 57,48 C 55,58 52,68 49,80",
-  "M 43,44 C 41,54 39,62 36,72",
-];
-
 /**
- * Where the pack goes next: a probability plume running south with the
- * current, brightest where arrival is most likely, fading with uncertainty.
+ * Where the pack goes next. The field today sits under its forecast position
+ * six hours on, and a vector on every sampled floe shows how it gets there —
+ * a real drift field, not a plume.
  */
 export function DriftLayer() {
   const reduce = useReducedMotion();
+  const now = useMemo(() => fieldPath(), []);
+  const then = useMemo(() => fieldPath(ICE_FIELD, 1), []);
+  const vectors = useMemo(() => sample(5, 0.42), []);
+
   return (
     <g>
       <defs>
-        <radialGradient id="dr-blob">
-          <stop offset="0%" stopColor="var(--mask)" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="var(--mask)" stopOpacity="0" />
-        </radialGradient>
-        <marker id="dr-head" viewBox="0 0 6 6" refX="4" refY="3" markerWidth="5" markerHeight="5" orient="auto">
-          <path d="M 0,0 L 6,3 L 0,6 Z" fill="var(--ink)" />
+        <marker id="dr-head" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto">
+          <path d="M 0,0 L 6,3 L 0,6 Z" fill="var(--ink)" fillOpacity="0.7" />
         </marker>
       </defs>
-      {DRIFT_BLOBS.map((b, i) => (
-        <motion.ellipse
-          key={i}
-          cx={b.cx}
-          cy={b.cy}
-          rx={b.rx}
-          ry={b.ry}
-          fill="url(#dr-blob)"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: b.o }}
-          transition={{ delay: 0.3 + i * 0.2, duration: 0.8 }}
-        />
-      ))}
-      {/* the pack today */}
-      <path
-        d={ICE_SHAPES[2]}
+
+      {/* forecast position: where the pack will be */}
+      <motion.path
+        d={then}
+        fillRule="nonzero"
         fill="var(--mask)"
-        fillOpacity="0.5"
+        fillOpacity={0.34}
         stroke="var(--mask-ink)"
-        strokeWidth="0.45"
+        strokeWidth={0.14}
+        strokeDasharray="0.9 0.7"
         strokeLinejoin="round"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.6 }}
       />
-      {DRIFT_ARROWS.map((d, i) => (
-        <motion.path
+
+      {/* the pack as observed now */}
+      <motion.path
+        d={now}
+        fillRule="nonzero"
+        fill="var(--strata-2)"
+        fillOpacity={0.85}
+        stroke="rgba(11,36,48,0.34)"
+        strokeWidth={0.13}
+        strokeLinejoin="round"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      />
+
+      {/* the field that carries it */}
+      {vectors.map((f, i) => (
+        <motion.line
           key={i}
-          d={d}
-          fill="none"
+          x1={f.x}
+          y1={f.y}
+          x2={f.x + f.dx}
+          y2={f.y + f.dy}
           stroke="var(--ink)"
-          strokeWidth="0.5"
-          strokeDasharray="2 1.6"
+          strokeOpacity={0.62}
+          strokeWidth={0.24}
           markerEnd="url(#dr-head)"
-          initial={reduce ? false : { pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ delay: 0.5 + i * 0.25, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ delay: 0.7 + (i % 12) * 0.03, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         />
       ))}
     </g>

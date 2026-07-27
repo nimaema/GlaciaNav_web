@@ -11,7 +11,8 @@ import { motion, useReducedMotion } from "framer-motion";
  */
 
 const C = 180; // centre of the 360 x 360 field
-const K = 4.67; // px per degree of latitude below the pole (60°N lands at r=140)
+const K = 4.22; // px per degree of latitude below the pole (54°N lands at r=152)
+const EDGE = 54; // southern limit of the chart: the foot of the Baltic
 
 const r = (lat: number) => (90 - lat) * K;
 const pt = (lat: number, lon: number) => {
@@ -37,7 +38,7 @@ function wedge(lat0: number, lat1: number, lon0: number, lon1: number) {
 
 /** The real extents of each horizon. */
 export const ZONES = [
-  { lat: [60, 66], lon: [17, 27], label: "Baltic" },
+  { lat: [54, 66], lon: [10, 30], label: "Baltic" },
   { lat: [66, 79], lon: [-22, 20], label: "Norwegian · Greenland" },
   { lat: [68, 79], lon: [30, 172], label: "Northeast Passage" },
 ] as const;
@@ -47,7 +48,7 @@ const PLACES = [
   { lat: 64.5, lon: 22, name: "Bothnian Bay", side: "right" },
   { lat: 69, lon: 4, name: "Norwegian Sea", side: "left" },
   { lat: 76, lon: -8, name: "Greenland Sea", side: "left" },
-  { lat: 74, lon: 100, name: "Northeast Passage", side: "left" },
+  { lat: 72, lon: 122, name: "Northeast Passage", side: "left" },
 ] as const;
 
 const LATS = [80, 70, 60];
@@ -60,11 +61,11 @@ export function ArcticChart({ active }: { active: number }) {
     <svg viewBox="0 0 360 360" className="h-full w-full" aria-hidden="true">
       <rect width="360" height="360" fill="var(--plate)" />
       {/* the water the chart covers */}
-      <circle cx={C} cy={C} r={r(60)} fill="var(--strata-1)" fillOpacity="0.55" />
+      <circle cx={C} cy={C} r={r(EDGE)} fill="var(--strata-1)" fillOpacity="0.5" />
 
       {/* meridians */}
       {MERIDIANS.map((lon) => {
-        const [x, y] = pt(58, lon);
+        const [x, y] = pt(EDGE, lon);
         return (
           <line
             key={lon}
@@ -78,7 +79,7 @@ export function ArcticChart({ active }: { active: number }) {
         );
       })}
 
-      {/* parallels */}
+      {/* parallels, and the chart's southern limit */}
       {LATS.map((lat) => (
         <circle
           key={lat}
@@ -88,9 +89,17 @@ export function ArcticChart({ active }: { active: number }) {
           fill="none"
           stroke="rgba(11,36,48,0.13)"
           strokeWidth="1"
-          strokeDasharray={lat === 60 ? "4 4" : undefined}
         />
       ))}
+      <circle
+        cx={C}
+        cy={C}
+        r={r(EDGE)}
+        fill="none"
+        stroke="rgba(11,36,48,0.22)"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
       {LATS.map((lat) => (
         <text
           key={`l-${lat}`}
@@ -185,7 +194,7 @@ export function ArcticChart({ active }: { active: number }) {
 
       {/* bearings */}
       {[0, 90, 180, -90].map((lon) => {
-        const [x, y] = pt(57.5, lon);
+        const [x, y] = pt(EDGE - 2.4, lon);
         return (
           <text
             key={`m-${lon}`}

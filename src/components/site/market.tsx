@@ -11,8 +11,13 @@ import { DataLabel, PlateFrame } from "./brand";
  * through the rollout moves real ground rather than growing a decorative ring.
  */
 
-/** The sea area each horizon opens, in thousands of square kilometres. */
-const AREA = [115, 1_240, 3_600];
+/**
+ * Sea area each horizon opens, in thousands of km², from published surface
+ * areas: the Baltic Sea (377,000); the Norwegian (1,383,000) and Greenland
+ * (1,205,000) seas; and the four seas the Northern Sea Route crosses — Kara
+ * (926,000), Laptev (714,000), East Siberian (987,000), Chukchi (620,000).
+ */
+const AREA = [377, 2_588, 3_247];
 
 function extent(i: number) {
   const z = ZONES[i];
