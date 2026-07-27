@@ -1,6 +1,16 @@
 import { type ReactNode, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ICE_FIELD, fieldPath, sample, thicknessPaths } from "./ice-field";
+import {
+  ICE_FIELD,
+  RAMP_CONCENTRATION,
+  RAMP_DRIFT,
+  RAMP_THICKNESS,
+  type RasterCell,
+  fieldPath,
+  rasterPaths,
+  sample,
+  thicknessPaths,
+} from "./ice-field";
 
 /**
  * The Bothnian Bay, drawn as a working nautical chart: Swedish coast to the
@@ -198,6 +208,78 @@ export function IceMaskLayer({
       animate={{ opacity: 1 }}
       transition={{ delay: 0.35, duration: 0.6 }}
     />
+  );
+}
+
+/* ------------------------------ Raster layer ----------------------------- */
+
+export type RasterMode = "concentration" | "thickness" | "drift";
+
+const RASTER_SPEC: Record<
+  RasterMode,
+  { value: (c: RasterCell) => number; max: number; ramp: string[]; floor: number }
+> = {
+  concentration: { value: (c) => c.c, max: 1, ramp: RAMP_CONCENTRATION, floor: 0.04 },
+  thickness: { value: (c) => c.t, max: 2.2, ramp: RAMP_THICKNESS, floor: 0.05 },
+  drift: { value: (c) => c.v, max: 20, ramp: RAMP_DRIFT, floor: 0 },
+};
+
+/**
+ * The gridded product laid over the chart: one cell per patch of sea, coloured
+ * by its value, the way a satellite-derived field actually arrives. Grouped
+ * into one path per colour step so the whole raster costs nine nodes.
+ */
+export function RasterLayer({ mode }: { mode: RasterMode }) {
+  const reduce = useReducedMotion();
+  const spec = RASTER_SPEC[mode];
+  const bands = useMemo(
+    () => rasterPaths(spec.value, spec.max, spec.ramp, spec.floor),
+    [spec]
+  );
+  return (
+    <g>
+      {bands.map((b, i) => (
+        <motion.path
+          key={b.fill}
+          d={b.d}
+          fill={b.fill}
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: i * 0.045, duration: 0.4 }}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** Drift arrows sampled off the raster, for the drift layer. */
+export function DriftArrows() {
+  const reduce = useReducedMotion();
+  const vectors = useMemo(() => sample(6, 0.4), []);
+  return (
+    <g>
+      <defs>
+        <marker id="ra-head" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto">
+          <path d="M 0,0 L 6,3 L 0,6 Z" fill="var(--ink)" fillOpacity="0.75" />
+        </marker>
+      </defs>
+      {vectors.map((f, i) => (
+        <motion.line
+          key={i}
+          x1={f.x}
+          y1={f.y}
+          x2={f.x + f.dx}
+          y2={f.y + f.dy}
+          stroke="var(--ink)"
+          strokeOpacity={0.7}
+          strokeWidth={0.26}
+          markerEnd="url(#ra-head)"
+          initial={reduce ? false : { pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ delay: 0.4 + (i % 10) * 0.03, duration: 0.5 }}
+        />
+      ))}
+    </g>
   );
 }
 

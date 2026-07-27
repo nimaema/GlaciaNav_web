@@ -1,6 +1,6 @@
 import { problem } from "@/content";
 import { CountUp, Reveal, Section, Stagger, StaggerItem } from "./reveal";
-import { DataAgeChart } from "./data-age-chart";
+import { ChartGapTimeline } from "./chart-gap-timeline";
 import { DataLabel } from "./brand";
 
 /**
@@ -28,9 +28,11 @@ export function Problem() {
       {/* The evidence */}
       <Reveal delay={0.08}>
         <div className="mt-10">
-          <DataLabel className="text-mask-ink">Figure 01 · age of the data in use</DataLabel>
+          <DataLabel className="text-mask-ink">
+            Figure 01 · twelve days of one winter
+          </DataLabel>
           <div className="mt-5">
-            <DataAgeChart />
+            <ChartGapTimeline />
           </div>
         </div>
       </Reveal>

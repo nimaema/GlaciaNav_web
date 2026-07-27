@@ -74,13 +74,10 @@ function concentration(x: number, y: number, n: (x: number, y: number) => number
   const shore = Math.min(Math.abs(x - 20), Math.abs(x - 80));
   if (shore < 9) c += (1 - shore / 9) * 0.3;
 
-  // a lead: the pack pulled open along a line from the north-west
-  const lead = Math.abs((y - 30) - (x - 28) * 1.45);
-  if (lead < 5.5) c -= (1 - lead / 5.5) * 0.9;
-
-  // a second, shorter lead further south
-  const lead2 = Math.abs((y - 78) - (x - 40) * -0.6);
-  if (lead2 < 4) c -= (1 - lead2 / 4) * 0.62;
+  // a lead: the pack has pulled open along one sinuous crack, not a lattice
+  const spine = 26 + (x - 22) * 1.24 + Math.sin(x / 7.5) * 5;
+  const lead = Math.abs(y - spine);
+  if (lead < 5.5) c -= (1 - lead / 5.5) * 0.82;
 
   return Math.max(0, Math.min(1, c));
 }
@@ -166,6 +163,74 @@ export function fieldPath(field: Floe[] = ICE_FIELD, drift = 0) {
       )
     )
     .join("");
+}
+
+/* -------------------------------- Raster -------------------------------- */
+
+/**
+ * The same field, gridded — the form a satellite product actually arrives in.
+ * Each cell carries concentration, thickness and drift for its patch of sea,
+ * so the map layers are a raster rather than a smear of gradients.
+ */
+export type RasterCell = { x: number; y: number; c: number; t: number; v: number };
+
+export const RASTER_COLS = 42;
+export const RASTER_ROWS = 52;
+
+function buildRaster(): RasterCell[] {
+  const n = noise2(913); // the same field the floes came from
+  const nt = noise2(5150);
+  const cells: RasterCell[] = [];
+  const cw = 100 / RASTER_COLS;
+  const ch = 120 / RASTER_ROWS;
+  for (let i = 0; i < RASTER_COLS; i++) {
+    for (let j = 0; j < RASTER_ROWS; j++) {
+      const x = i * cw;
+      const y = j * ch;
+      const c = concentration(x + cw / 2, y + ch / 2, n);
+      const t = c < 0.08 ? 0 : Math.max(0, Math.min(2.2, c * 1.75 + (nt(x / 7, y / 7) - 0.5) * 0.7));
+      const v = Math.max(0, 5 + (1 - c) * 12 + (nt(x / 11 + 3, y / 11 + 3) - 0.5) * 7);
+      cells.push({ x, y, c, t, v });
+    }
+  }
+  return cells;
+}
+
+export const RASTER: RasterCell[] = buildRaster();
+
+/** Colour ramps, quantised so the raster reads as classified data. */
+export const RAMP_THICKNESS = [
+  "#eaf3f7", "#d2e6ef", "#bfdce8", "#a1cadb",
+  "#83b7cd", "#5f9bb6", "#40809e", "#2b6480", "#1b4a5e",
+];
+export const RAMP_CONCENTRATION = [
+  "#ffffff", "#e2f6fd", "#c8effb", "#a7e6f8",
+  "#86dcf5", "#63d0f2", "#33c7f0", "#1ba5ca", "#0b607c",
+];
+export const RAMP_DRIFT = [
+  "#f4fbfd", "#dff2f8", "#c6e8f3", "#a8dcee",
+  "#87cfe8", "#63bede", "#3fa7c9", "#2b87a8", "#1b6280",
+];
+
+/** Group raster cells into one path per colour step: nine nodes, not two thousand. */
+export function rasterPaths(
+  value: (c: RasterCell) => number,
+  max: number,
+  ramp: string[],
+  floor = 0
+) {
+  const cw = 100 / RASTER_COLS;
+  const ch = 120 / RASTER_ROWS;
+  const buckets: string[][] = ramp.map(() => []);
+  for (const cell of RASTER) {
+    const v = value(cell);
+    if (v <= floor) continue;
+    const k = Math.min(ramp.length - 1, Math.max(0, Math.floor((v / max) * ramp.length)));
+    buckets[k].push(
+      `M${cell.x.toFixed(2)} ${cell.y.toFixed(2)}h${(cw + 0.04).toFixed(2)}v${(ch + 0.04).toFixed(2)}h${(-cw - 0.04).toFixed(2)}Z`
+    );
+  }
+  return buckets.map((b, i) => ({ fill: ramp[i], d: b.join("") })).filter((b) => b.d);
 }
 
 /* ------------------------------- Transect ------------------------------- */
