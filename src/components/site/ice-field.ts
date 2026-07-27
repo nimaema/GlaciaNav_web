@@ -168,6 +168,50 @@ export function fieldPath(field: Floe[] = ICE_FIELD, drift = 0) {
     .join("");
 }
 
+/* ------------------------------- Transect ------------------------------- */
+
+export type TransectPoint = {
+  /** Distance along the cut, in kilometres. */
+  km: number;
+  /** Classified as ice at this point. */
+  ice: boolean;
+  /** Thickness in metres; 0 in open water. */
+  t: number;
+  /** Drift speed in cm/s. */
+  v: number;
+};
+
+export const TRANSECT_KM = 140;
+
+/**
+ * A cut straight across the basin, sampled the way a survey line is: the
+ * classification, the thickness under it and the drift carrying it, all at the
+ * same points, so the three read against one axis.
+ */
+function buildTransect(): TransectPoint[] {
+  const n = noise2(4242);
+  const N = 220;
+  const out: TransectPoint[] = [];
+  for (let i = 0; i < N; i++) {
+    const u = i / (N - 1);
+    // heavier mid-basin, opening toward both shores, broken by leads
+    const c = Math.max(
+      0,
+      Math.min(1, 0.42 + Math.sin(u * Math.PI) * 0.42 + (n(u * 9, 3.2) - 0.5) * 1.5)
+    );
+    const ice = c > 0.4;
+    const t = ice
+      ? Math.max(0.12, Math.min(2.2, 0.2 + c * 1.5 + (n(u * 21, 8.4) - 0.5) * 0.85))
+      : 0;
+    // the pack slows where it is tight; leads and open water run faster
+    const v = Math.max(1.2, 6 + (1 - c) * 11 + (n(u * 6, 12.7) - 0.5) * 9);
+    out.push({ km: u * TRANSECT_KM, ice, t, v });
+  }
+  return out;
+}
+
+export const TRANSECT: TransectPoint[] = buildTransect();
+
 /** A sparse, even sample of the field — for drift arrows and callouts. */
 export function sample(every: number, minC = 0.35, field: Floe[] = ICE_FIELD) {
   return field.filter((f, i) => i % every === 0 && f.c > minC);
