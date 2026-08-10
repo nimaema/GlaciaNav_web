@@ -148,7 +148,7 @@ export const market = {
     {
       no: "01",
       title: "Baltic early adopters",
-      body: "Land the first icebreaker fleets: Arctia Oy and the Swedish icebreakers.",
+      body: "Land the first icebreaker fleets: The Swedish and Nordic icebreakers.",
     },
     {
       no: "02",
