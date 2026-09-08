@@ -195,8 +195,8 @@ export const team = {
   headline: "The team",
   note: "A University of Turku spin-off building deep-tech for the sea.",
   members: [
-    { name: "Javad Sheikh", role: "ML Scientist", email: "javad.sheikh@glacianav.com", photo: "/team/javad.jpg", focus: "50% 32%" },
-    { name: "Nima Emami", role: "ML Scientist", email: "nima.emami@glacianav.com", photo: "/team/nima.jpg", focus: "50% 28%" },
+    { name: "Javad Sheikh", role: "Team Lead", email: "javad.sheikh@glacianav.com", photo: "/team/javad.jpg", focus: "50% 32%" },
+    { name: "Nima Emami", role: "AI Engineer", email: "nima.emami@glacianav.com", photo: "/team/nima.jpg", focus: "50% 28%" },
     { name: "Wilma Tiainen", role: "Business Developer", email: "wilma.tiainen@glacianav.com", photo: "/team/wilma.jpg", focus: "50% 30%" },
   ],
 };
