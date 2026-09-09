@@ -201,24 +201,24 @@ export const team = {
   ],
 };
 
-export const ask = {
-  headline: "What we need from mentors",
-  subtext: "Concrete introductions and hard questions, both welcome.",
-  items: [
-    {
-      title: "Customer validation",
-      body: "How do we get enterprise fleet managers to commit time and data?",
-    },
-    {
-      title: "First paid pilot",
-      body: "How do we structure and negotiate a first paid pilot agreement?",
-    },
-    {
-      title: "Pricing the forecast",
-      body: "How should we price an ice-forecast subscription before the savings are proven?",
-    },
-  ],
-};
+// export const ask = {
+//   headline: "What we need from mentors",
+//   subtext: "Concrete introductions and hard questions, both welcome.",
+//   items: [
+//     {
+//       title: "Customer validation",
+//       body: "How do we get enterprise fleet managers to commit time and data?",
+//     },
+//     {
+//       title: "First paid pilot",
+//       body: "How do we structure and negotiate a first paid pilot agreement?",
+//     },
+//     {
+//       title: "Pricing the forecast",
+//       body: "How should we price an ice-forecast subscription before the savings are proven?",
+//     },
+//   ],
+// };
 
 export const contact = {
   headline: "Contact us",
